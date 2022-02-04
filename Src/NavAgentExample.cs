@@ -138,6 +138,11 @@ public class NavAgentExample : MonoBehaviour
 			yield return null;
 		}
 
+		// NOTE : Added this for a bit of stability to make sure the
+		//        Agent is EXACTLY on the end position of the off mesh
+		//		  link before completeing the link.
+		_navAgent.transform.position = endPos;
+
 		// All done so inform the agent it can resume control
 		_navAgent.CompleteOffMeshLink();
 	}
