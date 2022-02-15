@@ -11,8 +11,10 @@ public abstract class AIZombieState : AIState
 	// Private
 	protected int 						_playerLayerMask 	= -1;
 	protected int 						_bodyPartLayer		= -1;
-	protected int						_visualLayerMask	= -1;
+	protected int						_visualLayerMask	= -1;  
 	protected AIZombieStateMachine 		_zombieStateMachine = null;
+
+   
 
 	// -------------------------------------------------------------------------------------
 	// Name	:	Awake
@@ -26,18 +28,40 @@ public abstract class AIZombieState : AIState
 	{
 		// Get a mask for line of sight testing with the player. (+1) is a hack to include the
 		// default layer in the current version of unity.
-		_playerLayerMask = LayerMask.GetMask ("Player", "AI Body Part")+1;
-		_visualLayerMask = LayerMask.GetMask ("Player", "AI Body Part", "Visual Aggravator")+1;
+		_playerLayerMask = LayerMask.GetMask ("Player", "AI Body Part", "Doors")+1;
+		_visualLayerMask = LayerMask.GetMask ("Player", "AI Body Part", "Visual Aggravator", "Doors")+1;
 
 		// Get the layer index of the AI Body Part layer
 		_bodyPartLayer 	= LayerMask.NameToLayer ("AI Body Part");
 	}
 
-	// -------------------------------------------------------------------------------------
-	// Name	:	SetStateMachine
-	// Desc	:	Check for type compliance and store reference as derived type
-	// -------------------------------------------------------------------------------------
-	public override void SetStateMachine( AIStateMachine stateMachine )
+    // ------------------------------------------------------------------
+    // Name	:	OnAnimatorUpdated
+    // Desc	:	Called by the parent state machine to allow root motion
+    //			processing
+    // ------------------------------------------------------------------
+    public override void OnAnimatorUpdated()
+    {
+       
+        // Get the number of meters the root motion has updated for this update and
+        // divide by deltaTime to get meters per second. We then assign this to
+        // the nav agent's velocity.
+        if (_stateMachine.useRootPosition && Time.deltaTime > 0.0f)
+            _stateMachine.navAgent.velocity = ( _stateMachine.animator.deltaPosition / Time.deltaTime ) * _stateMachine.speedModifier;
+
+        // Grab the root rotation from the animator and assign as our transform's rotation.
+        if (_stateMachine.useRootRotation)
+            _stateMachine.transform.rotation = _stateMachine.animator.rootRotation;
+
+       
+
+    }
+
+    // -------------------------------------------------------------------------------------
+    // Name	:	SetStateMachine
+    // Desc	:	Check for type compliance and store reference as derived type
+    // -------------------------------------------------------------------------------------
+    public override void SetStateMachine( AIStateMachine stateMachine )
 	{
 		if (stateMachine.GetType () == typeof(AIZombieStateMachine)) 
 		{
@@ -77,14 +101,16 @@ public abstract class AIZombieState : AIState
 				// If the currently stored threat is not a player or if this player is closer than a player
 				// previously stored as the visual threat...this could be more important
 				if (curType != AITargetType.Visual_Player ||
-				    (curType == AITargetType.Visual_Player && distance < _zombieStateMachine.VisualThreat.distance)) {
+				    (curType == AITargetType.Visual_Player && distance < _zombieStateMachine.VisualThreat.distance))
+                {
 					// Is the collider within our view cone and do we have line or sight
 					RaycastHit hitInfo;
-					if (ColliderIsVisible (other, out hitInfo, _playerLayerMask)) 
+					if (_zombieStateMachine.isTrackingPlayer || ColliderIsVisible (other, out hitInfo, _playerLayerMask)) 
 					{
 						// Yep...it's close and in our FOV and we have line of sight so store as the current most dangerous threat
 						_zombieStateMachine.VisualThreat.Set (AITargetType.Visual_Player, other, other.transform.position, distance);
-					}
+                        _zombieStateMachine.StartPlayerTracking();
+                    }
 				}
 			} 
 			else 
@@ -129,6 +155,8 @@ public abstract class AIZombieState : AIState
 				// if We can hear it and is it closer then what we previously have stored
 				if (distanceToThreat<_zombieStateMachine.AudioThreat.distance)
 				{
+                   
+
 					// Most dangerous Audio Threat so far
 					_zombieStateMachine.AudioThreat.Set ( AITargetType.Audio, other, soundPos, distanceToThreat );
 				}
@@ -165,11 +193,12 @@ public abstract class AIZombieState : AIState
 	// -------------------------------------------------------------------------------------
 	protected virtual bool	ColliderIsVisible( Collider other,  out RaycastHit hitInfo, int layerMask=-1 )
 	{
+      
 		// Let's make sure we have something to return
 		hitInfo = new RaycastHit ();
 
-		// We need the state machine to be an AIZombieStateMachine
-		if (_zombieStateMachine == null) return false; 
+        // We need the state machine to be an AIZombieStateMachine
+        if (_zombieStateMachine == null) return false; 
 
 		// Calculate the angle between the sensor origin and the direction of the collider
 		Vector3 head 		= _stateMachine.sensorPosition;
@@ -180,6 +209,8 @@ public abstract class AIZombieState : AIState
 		// return false - no visibility
 		if (angle > _zombieStateMachine.fov * 0.5f)
 			return false;
+
+   
 
 		// Now we need to test line of sight. Perform a ray cast from our sensor origin in the direction of the collider for distance
 		// of our sensor radius scaled by the zombie's sight ability. This will return ALL hits.
@@ -226,4 +257,40 @@ public abstract class AIZombieState : AIState
 		// otherwise, something else is closer to us than the collider so line-of-sight is blocked
 		return false;
 	}
+
+    // -----------------------------------------------------------------------
+    // Name	:	OnAnimatorIKUpdated
+    // Desc	:	Override IK Goals
+    // -----------------------------------------------------------------------
+    public override void OnAnimatorIKUpdated()
+    {
+        if (_zombieStateMachine == null) return;
+
+        if (_zombieStateMachine.targetType != AITargetType.None)
+        {
+            // Look Vector factoring out Y
+            Vector3 noYLook = new Vector3(_zombieStateMachine.targetPosition.x, _zombieStateMachine.animator.GetBoneTransform(HumanBodyBones.Head).position.y, _zombieStateMachine.targetPosition.z);
+
+            // This is where we are trying to look
+            Vector3 newLookAtTarget = Vector3.Lerp(_zombieStateMachine.currentLookAtPosition, noYLook, Time.deltaTime);
+
+            // We have a max rotate angle of 120 so calculate our current LookAt angle to target as a T value in that range
+            float weight = Mathf.Clamp01(Mathf.InverseLerp(0.0f,
+                                                            120,
+                                                            Vector3.Angle(_zombieStateMachine.transform.forward,
+                                                                          newLookAtTarget - _zombieStateMachine.transform.position)
+                                                           ));
+
+            // The new look angle is 1-weight so influence dilutes as angle grows and lerp towards that value
+            _zombieStateMachine.currentLookAtWeight = Mathf.Lerp( _zombieStateMachine.currentLookAtWeight, 1 - weight, Time.deltaTime );
+            _zombieStateMachine.currentLookAtPosition = newLookAtTarget;
+
+            // Set look at position and weight
+            _zombieStateMachine.animator.SetLookAtPosition(_zombieStateMachine.currentLookAtPosition);
+            _zombieStateMachine.animator.SetLookAtWeight(_zombieStateMachine.currentLookAtWeight);
+        }
+        
+      
+    }
+
 }

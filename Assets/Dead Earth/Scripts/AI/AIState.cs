@@ -32,11 +32,11 @@ public abstract class AIState : MonoBehaviour
 	// ------------------------------------------------------------------
 	public virtual void 		OnAnimatorUpdated() 	
 	{
-		
+       
 		// Get the number of meters the root motion has updated for this update and
 		// divide by deltaTime to get meters per second. We then assign this to
 		// the nav agent's velocity.
-		if (_stateMachine.useRootPosition)
+		if (_stateMachine.useRootPosition && Time.deltaTime>0.0f)
 			_stateMachine.navAgent.velocity = _stateMachine.animator.deltaPosition / Time.deltaTime;
 
 		// Grab the root rotation from the animator and assign as our transform's rotation.
@@ -74,7 +74,7 @@ public abstract class AIState : MonoBehaviour
 	}
 
 	// -----------------------------------------------------------------------
-	// Name	:	FindSignedAngle
+	// Name	:	FindSignedAngle (2D Signed Angle Function)
 	// Desc	:	Returns the signed angle between to vectors (in degrees)
 	// -----------------------------------------------------------------------
 	public static float FindSignedAngle( Vector3 fromVector, Vector3 toVector )
@@ -82,7 +82,7 @@ public abstract class AIState : MonoBehaviour
 		if (fromVector == toVector)
 			return 0.0f;
 
-		float angle = Vector3.Angle (fromVector, toVector);
+		float angle = Vector3.Angle (new Vector3(fromVector.x, 0, fromVector.z), new Vector3(toVector.x,0, toVector.z));
 		Vector3 cross = Vector3.Cross (fromVector, toVector);
 		angle *= Mathf.Sign (cross.y);
 		return angle;

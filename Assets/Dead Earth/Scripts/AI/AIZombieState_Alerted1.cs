@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using System.Collections;
 
 public class AIZombieState_Alerted1 : AIZombieState 
@@ -34,10 +35,11 @@ public class AIZombieState_Alerted1 : AIZombieState
 	// ------------------------------------------------------------------
 	public override void		OnEnterState()			
 	{
-		base.OnEnterState ();
+        // Debug.Log("Entering Alerted");
+        base.OnEnterState ();
 		if (_zombieStateMachine == null)
 			return;
-		
+
 		// Configure State Machine
 		_zombieStateMachine.NavAgentControl (true, false);
 		_zombieStateMachine.speed 	= 0;
@@ -60,7 +62,9 @@ public class AIZombieState_Alerted1 : AIZombieState
 		_timer-=Time.deltaTime;
 		_directionChangeTimer += Time.deltaTime;
 
-		// Transition into a patrol state if available
+        
+
+		// If we have timed out searching for a target then transition set a new target along the waypoint route
 		if (_timer <= 0.0f) 
 		{
 			_zombieStateMachine.navAgent.SetDestination(_zombieStateMachine.GetWaypointPosition (false));
@@ -68,8 +72,19 @@ public class AIZombieState_Alerted1 : AIZombieState
 			_timer = _maxDuration;
 		}
 
-		// Do we have a visual threat that is the player. These take priority over audio threats
-		if (_zombieStateMachine.VisualThreat.type==AITargetType.Visual_Player)
+        // If path is partial or stale move onto next waypoint
+        if (_zombieStateMachine.navAgent.isPathStale ||
+            !_zombieStateMachine.navAgent.hasPath ||
+            _zombieStateMachine.navAgent.pathStatus != UnityEngine.AI.NavMeshPathStatus.PathComplete)
+        {
+           _zombieStateMachine.navAgent.SetDestination(_zombieStateMachine.GetWaypointPosition(true));
+            return AIStateType.Alerted;
+        }
+       
+       
+          
+        // Do we have a visual threat that is the player. These take priority over audio threats
+        if (_zombieStateMachine.VisualThreat.type==AITargetType.Visual_Player)
 		{
 			_zombieStateMachine.SetTarget ( _zombieStateMachine.VisualThreat );
 
@@ -110,11 +125,13 @@ public class AIZombieState_Alerted1 : AIZombieState
 
 		if ((_zombieStateMachine.targetType == AITargetType.Audio || _zombieStateMachine.targetType == AITargetType.Visual_Light) && !_zombieStateMachine.isTargetReached)
 		{
-			angle = AIState.FindSignedAngle (_zombieStateMachine.transform.forward, 
-				_zombieStateMachine.targetPosition - _zombieStateMachine.transform.position);
-			
+			angle = AIState.FindSignedAngle ( _zombieStateMachine.transform.forward, 
+				                              _zombieStateMachine.targetPosition - _zombieStateMachine.transform.position);
+
+            
 			if (_zombieStateMachine.targetType == AITargetType.Audio && Mathf.Abs (angle) < _threatAngleThreshold) 
 			{
+               
 				return AIStateType.Pursuit;
 			}
 
@@ -136,10 +153,11 @@ public class AIZombieState_Alerted1 : AIZombieState
 		if (_zombieStateMachine.targetType == AITargetType.Waypoint && !_zombieStateMachine.navAgent.pathPending)
 		{
 			angle = AIState.FindSignedAngle (_zombieStateMachine.transform.forward, 
-				_zombieStateMachine.navAgent.steeringTarget - _zombieStateMachine.transform.position);
+				                             _zombieStateMachine.navAgent.steeringTarget - _zombieStateMachine.transform.position);
 
 			if (Mathf.Abs (angle) < _waypointAngleThreshold)
 				return AIStateType.Patrol;
+
 			if (_directionChangeTimer > _directionChangeTime) 
 			{
 				_zombieStateMachine.seeking = (int)Mathf.Sign (angle);
@@ -156,9 +174,11 @@ public class AIZombieState_Alerted1 : AIZombieState
 		}
 
 
-		if (!_zombieStateMachine.useRootRotation) _zombieStateMachine.transform.Rotate (new Vector3(0.0f, _slerpSpeed * _zombieStateMachine.seeking * Time.deltaTime, 0.0f ));
+		if (!_zombieStateMachine.useRootRotation)
+            _zombieStateMachine.transform.Rotate (new Vector3(0.0f, _slerpSpeed * _zombieStateMachine.seeking * Time.deltaTime, 0.0f ));
 
 		return AIStateType.Alerted;
 	}
 
+   
 }

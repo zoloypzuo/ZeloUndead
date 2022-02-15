@@ -2,6 +2,7 @@
 using UnityEngine.AI;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 // Public Enums of the AI System
 public enum AIStateType 		{ None, Idle, Alerted, Patrol, Attack, Feeding, Pursuit, Dead }
@@ -9,10 +10,19 @@ public enum AITargetType		{ None, Waypoint, Visual_Player, Visual_Light, Visual_
 public enum AITriggerEventType	{ Enter, Stay, Exit }
 public enum AIBoneAlignmentType { XAxis, YAxis, ZAxis, XAxisInverted, YAxisInverted, ZAxisInverted }
 
+
+[System.Serializable]
+public class OnAnimatorIKEvent : UnityEvent<AIStateMachine, int, Animator> { }
+[System.Serializable]
+public class OnAnimatorMoveEvent : UnityEvent<AIStateMachine, Animator> { }
+
+
+
 // ----------------------------------------------------------------------
 // Class	:	AITarget
 // Desc		:	Describes a potential target to the AI System
 // ----------------------------------------------------------------------
+[System.Serializable]
 public struct AITarget
 {
 	private		AITargetType 	_type;			// The type of target
@@ -29,10 +39,22 @@ public struct AITarget
 
 	public void Set( AITargetType t, Collider c, Vector3 p, float d )
 	{
-		_type		=	t;
+        // Make sure that target is on the nav mesh otherwise AI will throw a bitch fit
+        NavMeshHit navMeshHit;
+        if (NavMesh.SamplePosition(p, out navMeshHit, 5.0f, NavMesh.AllAreas))
+        {
+            _position = navMeshHit.position;
+        }
+        else
+        {
+            Clear();
+            return;
+        }
+        
+
+        _type		=	t;
 		_collider	=	c;
-		_position	=	p;
-		_distance	=	d;
+        _distance   =   d;
 		_time		=	Time.time;
 	}
 
@@ -65,6 +87,8 @@ public abstract class AIStateMachine : MonoBehaviour
 	protected bool				_isTargetReached					=   false;
 	protected List<Rigidbody>	_bodyParts							=   new List<Rigidbody>();
 	protected int				_aiBodyPartLayer					= 	-1;
+    protected float             _speedModifier                      =   1;
+   
 
 	// Animation Layer Manager
 	protected Dictionary<string, bool>	_animLayersActive			= new Dictionary<string, bool>();
@@ -80,6 +104,10 @@ public abstract class AIStateMachine : MonoBehaviour
 	[SerializeField] 	protected int			   	 	_currentWaypoint 	= 	-1;
 	[SerializeField]	
 	[Range(0,15)]		protected float					_stoppingDistance	=	1.0f;
+
+    // Events
+    public OnAnimatorMoveEvent  AnimatorMoveEvent         = new OnAnimatorMoveEvent();
+    public OnAnimatorIKEvent    AnimatorIKEvent           = new OnAnimatorIKEvent();
 
 	// Layered Audio Control
 	protected ILayeredAudioSource						_layeredAudioSource	=	null;
@@ -169,6 +197,13 @@ public abstract class AIStateMachine : MonoBehaviour
 		if (_layeredAudioSource!=null)
 			_layeredAudioSource.Mute( mute );
 	}
+
+    public float speedModifier
+    {
+        get { return _speedModifier;  }
+        set { _speedModifier = value;}
+    }
+        
 
 	// -----------------------------------------------------------------
 	// Name	:	Awake
@@ -278,10 +313,10 @@ public abstract class AIStateMachine : MonoBehaviour
 	// Desc	:	This method allows any external method to force the AI out of its
 	//			current state and into the state specified
 	// ------------------------------------------------------------------------------
-	public void SetStateOverride ( AIStateType state )
+	public void SetStateOverride ( AIStateType state, bool interruptSelf = false )
 	{
 		// Set the current state
-		if ( state!= _currentStateType && _states.ContainsKey( state ))
+		if ( ( state!= _currentStateType || interruptSelf == true) && _states.ContainsKey( state ))
 		{
 			if (_currentState!=null)
 				 _currentState.OnExitState();
@@ -292,6 +327,7 @@ public abstract class AIStateMachine : MonoBehaviour
 		}
 	} 
 
+   
 	// -----------------------------------------------------------------------------
 	// Name	:	GetWaypointPosition
 	// Desc	:	Fetched the world space position of the state machine's currently
@@ -537,6 +573,9 @@ public abstract class AIStateMachine : MonoBehaviour
 	{
 		if (_currentState!=null)
 			_currentState.OnAnimatorUpdated();
+
+        // Allow any external influencers to update the movement
+        AnimatorMoveEvent.Invoke( this, _animator );
 	}
 
 	// ----------------------------------------------------------
@@ -549,6 +588,9 @@ public abstract class AIStateMachine : MonoBehaviour
 	{
 		if (_currentState!=null)
 			_currentState.OnAnimatorIKUpdated();
+
+        // Allow any extrenal influencers to modify IK goals
+        AnimatorIKEvent.Invoke(this, layerIndex, _animator);
 	}
 
 	// ----------------------------------------------------------

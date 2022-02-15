@@ -8,16 +8,47 @@ public enum ScreenFadeType{ FadeIn, FadeOut }
 public class PlayerHUD : MonoBehaviour 
 {
 	// Inspector Assigned UI References
-	[SerializeField] private GameObject _crosshair			=	null;
-	[SerializeField] private Text		_healthText			=	null;
-	[SerializeField] private Text		_staminaText		=	null;
-	[SerializeField] private Text		_interactionText	=	null;
-	[SerializeField] private Image 		_screenFade			=	null;
-	[SerializeField] private Text		_missionText		=	null;
-	[SerializeField] private float		_missionTextDisplayTime	=	3.0f;
+    [Header("UI Sliders")]
+    [SerializeField] private Slider _healthSlider       = null;
+    [SerializeField] private Slider _staminaSlider      = null;
+    [SerializeField] private Slider _infectionSlider    = null;
+    [SerializeField] private Slider _flashlightSlider  = null;
+    [SerializeField] private Slider _nightVisionSlider  = null;
 
-	// Internals
-	float _currentFadeLevel = 1.0f;
+    [Header("UI Text")]
+	[SerializeField] private Text		_notificationText   =	null;
+	[SerializeField] private Text		_transcriptText		=	null;
+	[SerializeField] private Text		_interactionText	=	null;
+
+    [Header("UI Images")]
+    [SerializeField] private Image      _crosshair          = null;
+
+    [Header("PDA References")]
+    [SerializeField] private GameObject _pdaOverlay         = null;
+    [SerializeField] private Text       _pdaPerson          = null;
+    [SerializeField] private Text       _pdaSubject         = null;
+    [SerializeField] private Slider     _pdaAudioTimeline   = null;
+
+    [Header("Shared Variables")]
+    [SerializeField] private SharedFloat            _health        = null;
+    [SerializeField] private SharedFloat            _stamina       = null;
+    [SerializeField] private SharedFloat            _infection     = null;
+    [SerializeField] private SharedFloat            _flashlight    = null;
+    [SerializeField] private SharedFloat            _nightVision   = null;
+    [SerializeField] private SharedString           _interactionString = null;
+    [SerializeField] private SharedString           _transcriptString  = null;
+    [SerializeField] private SharedTimedStringQueue _notificationQueue = null;
+    [SerializeField] private SharedVector3          _crosshairPosition = null;
+    [SerializeField] private SharedSprite           _crosshairSprite = null;
+    [SerializeField] private SharedFloat            _crosshairAlpha = null;
+
+    [Header("Additional Settings")]
+    [SerializeField] private Image 		_screenFade             =	null;
+    [SerializeField] private Sprite     _defaultCrosshair       =   null;
+    [SerializeField] private float      _crosshairAlphaScale    =   1.0f;
+
+    // Internals
+    float _currentFadeLevel = 1.0f;
 	IEnumerator _coroutine	= null;
 
 	public void Start()
@@ -28,49 +59,7 @@ public class PlayerHUD : MonoBehaviour
 			color.a = _currentFadeLevel;
 			_screenFade.color = color;
 		}
-
-		if (_missionText)
-		{
-			Invoke(	"HideMissionText", _missionTextDisplayTime);
-		}
 	}
-
-	// ---------------------------------------------------------------
-	// Name : Invalidate
-	// Desc : Refreshes the values of UI elements
-	// ---------------------------------------------------------------
-	public void Invalidate( CharacterManager charManager )
-	{
-		if (charManager==null) return;
-		if (_healthText) 		_healthText.text 	= "Health "+((int)charManager.health).ToString();
-		if (_staminaText)		_staminaText.text 	= "Stamina "+((int)charManager.stamina).ToString();
-	}
-
-
-	// ---------------------------------------------------------------
-	// Name	:	SetInteractionText
-	// Desc	:	This function sets the text that is displayed at the
-	//			bottom of the display area. It is called the
-	//			InterationText because it is used to display messages
-	//			relating to interacting with objects.
-	// ---------------------------------------------------------------
-	public void SetInteractionText( string text )
-	{
-		if (_interactionText)
-		{
-			if (text==null)
-			{
-				_interactionText.text = null;
-				_interactionText.gameObject.SetActive (false);
-			}
-			else
-			{
-				_interactionText.text = text;
-				_interactionText.gameObject.SetActive (true);
-			}
-		}
-	}
-
 
 	public void Fade ( float seconds, ScreenFadeType direction )
 	{
@@ -115,20 +104,63 @@ public class PlayerHUD : MonoBehaviour
 		_screenFade.color = oldColor;
 	}
 
-	public void ShowMissionText( string text )
-	{
-		if (_missionText)
-		{
-			_missionText.text = text;
-			_missionText.gameObject.SetActive(true);
-		}
-	}
+    void Update()
+    {
+       
+        if (_healthSlider != null && _health != null)
+            _healthSlider.value = _health.value;
 
-	public void HideMissionText(  )
-	{
-		if (_missionText)
-		{
-			_missionText.gameObject.SetActive(false);
-		}
-	}
+        if (_staminaSlider != null && _stamina != null)
+            _staminaSlider.value = _stamina.value;
+
+        if (_infectionSlider != null && _infection != null)
+            _infectionSlider.value = _infection.value;
+
+        if (_flashlightSlider != null && _flashlight != null)
+            _flashlightSlider.value = _flashlight.value;
+
+        if (_nightVisionSlider != null && _nightVision != null)
+            _nightVisionSlider.value = _nightVision.value;
+
+        if (_interactionText != null && _interactionString != null)
+            _interactionText.text = _interactionString.value;
+
+        if (_transcriptText != null && _transcriptString != null)
+            _transcriptText.text = _transcriptString.value;
+
+        if (_notificationText != null && _notificationQueue != null)
+            _notificationText.text = _notificationQueue.text;
+
+        if (_crosshair && _crosshairPosition )
+        {
+            _crosshair.transform.position = _crosshairPosition.value;
+          
+          
+        }
+
+        if (_crosshairSprite)
+            _crosshair.sprite = _crosshairSprite.value == null ? _defaultCrosshair : _crosshairSprite.value;
+
+        if (_crosshairAlpha)
+            _crosshair.color = new Color(_crosshair.color.r, _crosshair.color.g, _crosshair.color.b, _crosshairAlpha.value * _crosshairAlphaScale);
+    }
+
+    public void OnBeginAudio(InventoryItemAudio audioItem)
+    {
+        if (!audioItem) return;
+
+        if (_pdaOverlay) _pdaOverlay.SetActive(true);
+        if (_pdaPerson) _pdaPerson.text = audioItem.person;
+        if (_pdaSubject) _pdaSubject.text = audioItem.subject;
+    }
+
+    public void OnUpdateAudio(float time)
+    {
+        if (_pdaAudioTimeline) _pdaAudioTimeline.value = time;
+    }
+
+    public void OnEndAudio()
+    {
+        if (_pdaOverlay) _pdaOverlay.SetActive(false);
+    }
 }
