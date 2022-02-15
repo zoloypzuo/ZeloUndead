@@ -112,3 +112,10 @@ fabric.properties
 *.msgpack
 .svn/
 *.exe
+
+Logs/
+Packages/
+ProjectSettings/
+*.asset
+*.meta
+*.unity
