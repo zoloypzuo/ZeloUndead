@@ -2,20 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimedDestruct : MonoBehaviour 
+public class TimedDestruct : MonoBehaviour
 {
+    [SerializeField] private float _time = 10.0f;
 
-	[SerializeField] private float _time	=	10.0f;
+    // Use this for initialization
+    void Awake() {
+        Invoke("DestroyNow", _time);
+    }
 
-	// Use this for initialization
-	void Awake () 
-	{
-		Invoke(	"DestroyNow", _time );
-	}
-	
 
-	void DestroyNow () 
-	{
+    void DestroyNow() {
         GameObject.Destroy(gameObject);
-	}
+    }
 }

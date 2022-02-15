@@ -5,22 +5,18 @@ using UnityEngine;
 public class CollectableItem : InteractiveItem
 {
     // Inspector Assigned
-    [SerializeField]
-    protected Inventory _inventory = null;
+    [SerializeField] protected Inventory _inventory = null;
 
-    [Header("Collectable Item Properties")]
-    [SerializeField]
+    [Header("Collectable Item Properties")] [SerializeField]
     protected InventoryItem _inventoryItem = null;
 
     // Properties
-    public Inventory inventory
-    {
+    public Inventory inventory {
         get { return _inventory; }
         set { _inventory = value; }
     }
 
-    public InventoryItem inventoryItem
-    {
+    public InventoryItem inventoryItem {
         get { return _inventoryItem; }
     }
 
@@ -31,15 +27,12 @@ public class CollectableItem : InteractiveItem
     // Name :   GetText (Override)
     // Desc :   Returns the Interactive Text for the current item.
     // --------------------------------------------------------------------------------------------
-    public override string GetText()
-    {
+    public override string GetText() {
         // If we have created the interactive text yet then do it
-        if (_interactiveText == null)
-        {
+        if (_interactiveText == null) {
             if (_inventoryItem != null)
                 _interactiveText = _inventoryItem.inventoryName + "\n" + _inventoryItem.pickupText;
-            else
-            {
+            else {
                 _interactiveText = "ERROR: No InventoryItem assigned to " + name;
             }
         }
@@ -52,12 +45,9 @@ public class CollectableItem : InteractiveItem
     // Desc :   The base functionality for Activating a CollectableItem. It adds the item to the
     //          references IInventory
     // --------------------------------------------------------------------------------------------
-    public override void Activate(CharacterManager characterManager)
-    {
-        if (_inventory != null)
-        {
-            if (_inventory.AddItem(this))
-            {
+    public override void Activate(CharacterManager characterManager) {
+        if (_inventory != null) {
+            if (_inventory.AddItem(this)) {
                 Destroy(gameObject);
             }
         }

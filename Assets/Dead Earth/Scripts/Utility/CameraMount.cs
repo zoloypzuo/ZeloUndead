@@ -8,14 +8,11 @@ public class CameraMount : MonoBehaviour
     public float damp = 1;
 
     // Start is called before the first frame update
-    void Start()
-    {
-        
+    void Start() {
     }
 
     // Update is called once per frame
-    void LateUpdate()
-    {
+    void LateUpdate() {
         transform.rotation = Quaternion.Slerp(transform.rotation, target.rotation, Time.deltaTime * damp);
         transform.position = Vector3.Slerp(transform.position, target.position, Time.deltaTime * damp);
     }

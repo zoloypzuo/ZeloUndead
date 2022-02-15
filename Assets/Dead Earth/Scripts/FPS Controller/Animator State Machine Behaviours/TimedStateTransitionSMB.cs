@@ -15,22 +15,18 @@ public class TimedStateTransitionSMB : StateMachineBehaviour
     public string StateName = "Empty State";
 
     // Internals
-    private float   _timer     = 0.0f;
-    private int     _stateHash = -1; 
-   
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex)
-    {
+    private float _timer = 0.0f;
+    private int _stateHash = -1;
+
+    override public void OnStateEnter(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex) {
         _timer = 0.0f;
-        _stateHash = Animator.StringToHash( StateName );
+        _stateHash = Animator.StringToHash(StateName);
     }
 
 
-
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex)
-    {
+    override public void OnStateUpdate(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex) {
         _timer += Time.deltaTime;
-        if (_timer > IdleTimeout)
-        {
+        if (_timer > IdleTimeout) {
             _timer = float.MinValue;
             animator.CrossFade(_stateHash, TransitionTime);
         }

@@ -1,116 +1,114 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AIZombieState_Feeding1 : AIZombieState 
+public class AIZombieState_Feeding1 : AIZombieState
 {
-	// Inspector Assigned Variabled
-	[SerializeField]						float		_slerpSpeed					=	5.0f;
-	[SerializeField]						Transform	_bloodParticlesMount		=	null;
-	[SerializeField] [Range(0.01f, 1.0f)] 	float 		_bloodParticlesBurstTime	=	0.1f;
-	[SerializeField] [Range(1, 100)]		int 		_bloodParticlesBurstAmount 	= 	10;
+    // Inspector Assigned Variabled
+    [SerializeField] float _slerpSpeed = 5.0f;
+    [SerializeField] Transform _bloodParticlesMount = null;
+    [SerializeField] [Range(0.01f, 1.0f)] float _bloodParticlesBurstTime = 0.1f;
+    [SerializeField] [Range(1, 100)] int _bloodParticlesBurstAmount = 10;
 
-	// Private Fields
-	private int 			_eatingStateHash 		= Animator.StringToHash("Feeding State");
-	private int				_crawlEatingStateHash	= Animator.StringToHash("Crawl Feeding State");
-	private int				_eatingLayerIndex		= -1;
-	private float			_timer					= 0.0f;
-	// Mandatory Overrides
-	public override AIStateType GetStateType() { return AIStateType.Feeding; }
-	public override void 		OnEnterState()
-	{
-		
-		// Base class processing
-		base.OnEnterState ( );
-		if (_zombieStateMachine==null) return;
+    // Private Fields
+    private int _eatingStateHash = Animator.StringToHash("Feeding State");
+    private int _crawlEatingStateHash = Animator.StringToHash("Crawl Feeding State");
+    private int _eatingLayerIndex = -1;
 
-		// Get layer index
-		if (_eatingLayerIndex==-1 )
-			_eatingLayerIndex= _zombieStateMachine.animator.GetLayerIndex("Cinematic");
+    private float _timer = 0.0f;
 
-		// Reset Blood Particles Timer
-		_timer = 0.0f;
+    // Mandatory Overrides
+    public override AIStateType GetStateType() {
+        return AIStateType.Feeding;
+    }
 
-		// Configure the State Machine's Animator
-		_zombieStateMachine.feeding			= true;
-		_zombieStateMachine.seeking 		= 0;
-		_zombieStateMachine.speed 			= 0;
-		_zombieStateMachine.attackType		= 0;
+    public override void OnEnterState() {
+        // Base class processing
+        base.OnEnterState();
+        if (_zombieStateMachine == null) return;
 
-		// Agent updates postion but not rotation
-		_stateMachine.NavAgentControl(true,false);
-	}
+        // Get layer index
+        if (_eatingLayerIndex == -1)
+            _eatingLayerIndex = _zombieStateMachine.animator.GetLayerIndex("Cinematic");
 
-	public override void OnExitState()
-	{
-		if (_zombieStateMachine!=null)
-			_zombieStateMachine.feeding = false;
-	}
+        // Reset Blood Particles Timer
+        _timer = 0.0f;
 
-	// ---------------------------------------------------------------------
-	// Name	:	OnUpdateAI
-	// Desc	:	The engine of this state
-	// ---------------------------------------------------------------------
-	public override AIStateType	OnUpdate( )	
-	{ 
-		_timer += Time.deltaTime;
+        // Configure the State Machine's Animator
+        _zombieStateMachine.feeding = true;
+        _zombieStateMachine.seeking = 0;
+        _zombieStateMachine.speed = 0;
+        _zombieStateMachine.attackType = 0;
 
-		if (_zombieStateMachine.satisfaction > 0.9f) 
-		{
-			_zombieStateMachine.GetWaypointPosition (false);
-			return AIStateType.Alerted;
-		}
+        // Agent updates postion but not rotation
+        _stateMachine.NavAgentControl(true, false);
+    }
 
-		// If Visual Threat then drop into alert mode
-		if (_zombieStateMachine.VisualThreat.type!=AITargetType.None && _zombieStateMachine.VisualThreat.type!=AITargetType.Visual_Food)
-		{
-			_zombieStateMachine.SetTarget ( _zombieStateMachine.VisualThreat );
-			return AIStateType.Alerted;
-		}	
+    public override void OnExitState() {
+        if (_zombieStateMachine != null)
+            _zombieStateMachine.feeding = false;
+    }
 
-		// If Audio Threat then drop into alert mode
-		if (_zombieStateMachine.AudioThreat.type==AITargetType.Audio )
-		{
-			_zombieStateMachine.SetTarget ( _zombieStateMachine.AudioThreat);
-			return AIStateType.Alerted;
-		}
+    // ---------------------------------------------------------------------
+    // Name	:	OnUpdateAI
+    // Desc	:	The engine of this state
+    // ---------------------------------------------------------------------
+    public override AIStateType OnUpdate() {
+        _timer += Time.deltaTime;
 
-		// Is the feeding animation playing now
-		int currentHash = _zombieStateMachine.animator.GetCurrentAnimatorStateInfo(_eatingLayerIndex).shortNameHash;
-		if ( currentHash == _eatingStateHash || currentHash == _crawlEatingStateHash)
-		{
-			_zombieStateMachine.satisfaction = Mathf.Min (_zombieStateMachine.satisfaction + ((Time.deltaTime * _zombieStateMachine.replenishRate)/100.0f),1.0f);
-			if (GameSceneManager.instance && GameSceneManager.instance.bloodParticles && _bloodParticlesMount) 
-			{
-				if (_timer > _bloodParticlesBurstTime) 
-				{
-					ParticleSystem system = GameSceneManager.instance.bloodParticles;
-					system.transform.position = _bloodParticlesMount.transform.position;
-					system.transform.rotation = _bloodParticlesMount.transform.rotation;
-					var settings = system.main;
-					settings.simulationSpace = ParticleSystemSimulationSpace.World;
-					system.Emit (_bloodParticlesBurstAmount);
-					_timer = 0.0f;
-				}
+        if (_zombieStateMachine.satisfaction > 0.9f) {
+            _zombieStateMachine.GetWaypointPosition(false);
+            return AIStateType.Alerted;
+        }
 
-			}
-		}
-			
-		if (!_zombieStateMachine.useRootRotation)
-		{
-			// Keep the zombie facing the player at all times
-			Vector3 targetPos = _zombieStateMachine.targetPosition;
-			targetPos.y = _zombieStateMachine.transform.position.y;
-			Quaternion  newRot = Quaternion.LookRotation (  targetPos - _zombieStateMachine.transform.position);
-			_zombieStateMachine.transform.rotation = Quaternion.Slerp( _zombieStateMachine.transform.rotation, newRot, Time.deltaTime* _slerpSpeed);
-		}
+        // If Visual Threat then drop into alert mode
+        if (_zombieStateMachine.VisualThreat.type != AITargetType.None &&
+            _zombieStateMachine.VisualThreat.type != AITargetType.Visual_Food) {
+            _zombieStateMachine.SetTarget(_zombieStateMachine.VisualThreat);
+            return AIStateType.Alerted;
+        }
 
-		Vector3 headToTarget = _zombieStateMachine.targetPosition - _zombieStateMachine.animator.GetBoneTransform(HumanBodyBones.Head).position;
-		_zombieStateMachine.transform.position = Vector3.Lerp(   _zombieStateMachine.transform.position,
-																 _zombieStateMachine.transform.position + headToTarget,
-																 Time.deltaTime );
+        // If Audio Threat then drop into alert mode
+        if (_zombieStateMachine.AudioThreat.type == AITargetType.Audio) {
+            _zombieStateMachine.SetTarget(_zombieStateMachine.AudioThreat);
+            return AIStateType.Alerted;
+        }
 
-		// Stay in Feeding state
-		return AIStateType.Feeding;
-	}
+        // Is the feeding animation playing now
+        int currentHash = _zombieStateMachine.animator.GetCurrentAnimatorStateInfo(_eatingLayerIndex).shortNameHash;
+        if (currentHash == _eatingStateHash || currentHash == _crawlEatingStateHash) {
+            _zombieStateMachine.satisfaction =
+                Mathf.Min(
+                    _zombieStateMachine.satisfaction + ((Time.deltaTime * _zombieStateMachine.replenishRate) / 100.0f),
+                    1.0f);
+            if (GameSceneManager.instance && GameSceneManager.instance.bloodParticles && _bloodParticlesMount) {
+                if (_timer > _bloodParticlesBurstTime) {
+                    ParticleSystem system = GameSceneManager.instance.bloodParticles;
+                    system.transform.position = _bloodParticlesMount.transform.position;
+                    system.transform.rotation = _bloodParticlesMount.transform.rotation;
+                    var settings = system.main;
+                    settings.simulationSpace = ParticleSystemSimulationSpace.World;
+                    system.Emit(_bloodParticlesBurstAmount);
+                    _timer = 0.0f;
+                }
+            }
+        }
 
+        if (!_zombieStateMachine.useRootRotation) {
+            // Keep the zombie facing the player at all times
+            Vector3 targetPos = _zombieStateMachine.targetPosition;
+            targetPos.y = _zombieStateMachine.transform.position.y;
+            Quaternion newRot = Quaternion.LookRotation(targetPos - _zombieStateMachine.transform.position);
+            _zombieStateMachine.transform.rotation = Quaternion.Slerp(_zombieStateMachine.transform.rotation, newRot,
+                Time.deltaTime * _slerpSpeed);
+        }
+
+        Vector3 headToTarget = _zombieStateMachine.targetPosition -
+                               _zombieStateMachine.animator.GetBoneTransform(HumanBodyBones.Head).position;
+        _zombieStateMachine.transform.position = Vector3.Lerp(_zombieStateMachine.transform.position,
+            _zombieStateMachine.transform.position + headToTarget,
+            Time.deltaTime);
+
+        // Stay in Feeding state
+        return AIStateType.Feeding;
+    }
 }

@@ -9,21 +9,22 @@ public class InventoryItemHealth : InventoryItem
     [Header("Health Properties")]
     [Tooltip("The amount Health is boosted on consumption.")]
     [Range(0.0f, 100.0f)]
-    [SerializeField] protected float _healingAmount = 0.0f;
+    [SerializeField]
+    protected float _healingAmount = 0.0f;
 
-    [Header("Shared Variables")]
-    [Tooltip("The SharedFloat that receives the boost.")]
-    [SerializeField] protected SharedFloat _recipient = null;
+    [Header("Shared Variables")] [Tooltip("The SharedFloat that receives the boost.")] [SerializeField]
+    protected SharedFloat _recipient = null;
 
     // Public Properties
-    public float healingAmount { get { return _healingAmount; } }
+    public float healingAmount {
+        get { return _healingAmount; }
+    }
 
     // --------------------------------------------------------------------------------------------
     // Name :   Use
     // Desc :   Called when the item is consumed from the inventory
     // --------------------------------------------------------------------------------------------
-    public override InventoryItem Use(Vector3 position, bool playAudio = true, Inventory inventory = null)
-    {   
+    public override InventoryItem Use(Vector3 position, bool playAudio = true, Inventory inventory = null) {
         // Add health
         if (_recipient)
             _recipient.value = Mathf.Min(_recipient.value + _healingAmount, 100.0f);

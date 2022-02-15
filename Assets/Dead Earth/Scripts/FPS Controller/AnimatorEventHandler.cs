@@ -17,8 +17,7 @@ public class AnimatorEventHandler : MonoBehaviour
     // Name :   Start
     // Desc :   Caches a reference to the Character manager futher up the chain
     // --------------------------------------------------------------------------------------------
-    void Start()
-    {
+    void Start() {
         _characterManager = GetComponentInParent<CharacterManager>();
     }
 
@@ -26,10 +25,8 @@ public class AnimatorEventHandler : MonoBehaviour
     // Name : FireWeaponEvent
     // Desc : Function called by Fire animation clip events to handle the fire processing.
     // --------------------------------------------------------------------------------------------
-    public void FireWeaponEvent( int direction )
-    {
+    public void FireWeaponEvent(int direction) {
         if (_characterManager)
             _characterManager.DoDamage(direction);
     }
-   
 }

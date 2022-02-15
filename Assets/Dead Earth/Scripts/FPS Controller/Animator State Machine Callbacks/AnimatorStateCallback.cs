@@ -9,8 +9,15 @@ using System.Collections;
 // ------------------------------------------------------------------------------------------------
 public class AnimatorStateCallback : MonoBehaviour
 {
-    public virtual void OnAction(string             context, CharacterManager characterManager = null) { }
-    public virtual void OnAction(int                context, CharacterManager characterManager = null) { }
-    public virtual void OnAction(float              context, CharacterManager characterManager = null) { }
-    public virtual void OnAction(UnityEngine.Object context, CharacterManager characterManager = null) { }
+    public virtual void OnAction(string context, CharacterManager characterManager = null) {
+    }
+
+    public virtual void OnAction(int context, CharacterManager characterManager = null) {
+    }
+
+    public virtual void OnAction(float context, CharacterManager characterManager = null) {
+    }
+
+    public virtual void OnAction(UnityEngine.Object context, CharacterManager characterManager = null) {
+    }
 }

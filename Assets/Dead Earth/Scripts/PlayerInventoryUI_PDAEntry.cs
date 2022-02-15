@@ -12,23 +12,21 @@ using UnityEngine.UI;
 public class PlayerInventoryUI_PDAEntry : MonoBehaviour
 {
     // Inspector Assigned
-    [SerializeField] protected Text _name           = null;
-    [SerializeField] protected Text _subject        = null;
-    [SerializeField] protected Color _normalColor   = Color.cyan;
-    [SerializeField] protected Color _hoverColor    = Color.yellow;
-    [SerializeField] protected Color _activeColor   = Color.red;
+    [SerializeField] protected Text _name = null;
+    [SerializeField] protected Text _subject = null;
+    [SerializeField] protected Color _normalColor = Color.cyan;
+    [SerializeField] protected Color _hoverColor = Color.yellow;
+    [SerializeField] protected Color _activeColor = Color.red;
 
     // Internals
-    protected PlayerInventoryUI     _inventoryUI        = null;
-    protected InventoryItemAudio    _inventoryItemAudio = null;
-    protected int                   _index              = -1;
+    protected PlayerInventoryUI _inventoryUI = null;
+    protected InventoryItemAudio _inventoryItemAudio = null;
+    protected int _index = -1;
 
     // Helper Propetry
     // Grabs the InventoryUI from the parent hierarchy if not done so already
-    PlayerInventoryUI inventoryUI
-    {
-        get
-        {
+    PlayerInventoryUI inventoryUI {
+        get {
             if (!_inventoryUI)
                 _inventoryUI = GetComponentInParent<PlayerInventoryUI>();
 
@@ -41,8 +39,7 @@ public class PlayerInventoryUI_PDAEntry : MonoBehaviour
     // Desc :   Returns true if this audio recording entry is 
     //          currently playing.
     // --------------------------------------------------------------------
-    bool IsActive()
-    {
+    bool IsActive() {
         if (!inventoryUI || !inventoryUI.inventory || !_inventoryItemAudio) return false;
         return inventoryUI.inventory.GetActiveAudioRecording() == _index ? true : false;
     }
@@ -52,8 +49,7 @@ public class PlayerInventoryUI_PDAEntry : MonoBehaviour
     // Desc	:	Called by the InventoryUI to configure the entry with
     //          with its text data
     // --------------------------------------------------------------------
-    public void SetData(InventoryItemAudio itemAudio, int index)
-    {
+    public void SetData(InventoryItemAudio itemAudio, int index) {
         // Store Audio Item
         _inventoryItemAudio = itemAudio;
 
@@ -64,57 +60,50 @@ public class PlayerInventoryUI_PDAEntry : MonoBehaviour
         bool isActive = IsActive();
 
         // Set the actual Text
-        if (_inventoryItemAudio)
-        {
-            if (_name)      _name.text      = _inventoryItemAudio.person;
-            if (_subject)   _subject.text   = _inventoryItemAudio.subject;
+        if (_inventoryItemAudio) {
+            if (_name) _name.text = _inventoryItemAudio.person;
+            if (_subject) _subject.text = _inventoryItemAudio.subject;
         }
-        else
-        {
-            if (_name)      _name.text      = null;
-            if (_subject)   _subject.text   = null;
+        else {
+            if (_name) _name.text = null;
+            if (_subject) _subject.text = null;
         }
 
         // Set Text Colors
-        if (_name)      _name.color     = isActive ? _activeColor : _normalColor;
-        if (_subject)   _subject.color  = isActive ? _activeColor : _normalColor;
+        if (_name) _name.color = isActive ? _activeColor : _normalColor;
+        if (_subject) _subject.color = isActive ? _activeColor : _normalColor;
     }
 
     // --------------------------------------------------------------------
     // Name :   OnPointerEnter
     // Desc :   Called by Event System when mouse moves over the entry
     // --------------------------------------------------------------------
-    public void OnPointerEnter()
-    {
+    public void OnPointerEnter() {
         if (IsActive()) return;
-        if (_name)      _name.color     = _hoverColor;
-        if (_subject)   _subject.color  = _hoverColor;
-
+        if (_name) _name.color = _hoverColor;
+        if (_subject) _subject.color = _hoverColor;
     }
 
     // --------------------------------------------------------------------
     // Name :   OnPointerExit
     // Desc :   Called by Event System when mouse exits the entry
     // --------------------------------------------------------------------
-    public void OnPointerExit()
-    {
+    public void OnPointerExit() {
         if (IsActive()) return;
-        if (_name)      _name.color     = _normalColor;
-        if (_subject)   _subject.color  = _normalColor;
+        if (_name) _name.color = _normalColor;
+        if (_subject) _subject.color = _normalColor;
     }
 
     // --------------------------------------------------------------------
     // Name :   OnPointerClick
     // Desc :   Called by Event System when mouse Clicks on Entry
     // --------------------------------------------------------------------
-    public void OnPointerClick()
-    {
+    public void OnPointerClick() {
         if (!_inventoryItemAudio) return;
-        
+
         // Tell the inventory to play the audio recording at the
         // corresponding index
-        if (inventoryUI && inventoryUI.inventory)
-        {
+        if (inventoryUI && inventoryUI.inventory) {
             inventoryUI.inventory.PlayAudioRecording(_index);
         }
 
@@ -123,6 +112,5 @@ public class PlayerInventoryUI_PDAEntry : MonoBehaviour
         inventoryUI.RefreshPDAEntries();
 
         inventoryUI.SelectTabGroup(1, 1);
-
-    } 
+    }
 }

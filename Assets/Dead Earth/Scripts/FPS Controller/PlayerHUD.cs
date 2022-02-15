@@ -3,110 +3,109 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum ScreenFadeType{ FadeIn, FadeOut }
-
-public class PlayerHUD : MonoBehaviour 
+public enum ScreenFadeType
 {
-	// Inspector Assigned UI References
-    [Header("UI Sliders")]
-    [SerializeField] private Slider _healthSlider       = null;
-    [SerializeField] private Slider _staminaSlider      = null;
-    [SerializeField] private Slider _infectionSlider    = null;
-    [SerializeField] private Slider _flashlightSlider  = null;
-    [SerializeField] private Slider _nightVisionSlider  = null;
+    FadeIn,
+    FadeOut
+}
 
-    [Header("UI Text")]
-	[SerializeField] private Text		_notificationText   =	null;
-	[SerializeField] private Text		_transcriptText		=	null;
-	[SerializeField] private Text		_interactionText	=	null;
+public class PlayerHUD : MonoBehaviour
+{
+    // Inspector Assigned UI References
+    [Header("UI Sliders")] [SerializeField]
+    private Slider _healthSlider = null;
 
-    [Header("UI Images")]
-    [SerializeField] private Image      _crosshair          = null;
+    [SerializeField] private Slider _staminaSlider = null;
+    [SerializeField] private Slider _infectionSlider = null;
+    [SerializeField] private Slider _flashlightSlider = null;
+    [SerializeField] private Slider _nightVisionSlider = null;
 
-    [Header("PDA References")]
-    [SerializeField] private GameObject _pdaOverlay         = null;
-    [SerializeField] private Text       _pdaPerson          = null;
-    [SerializeField] private Text       _pdaSubject         = null;
-    [SerializeField] private Slider     _pdaAudioTimeline   = null;
+    [Header("UI Text")] [SerializeField] private Text _notificationText = null;
+    [SerializeField] private Text _transcriptText = null;
+    [SerializeField] private Text _interactionText = null;
 
-    [Header("Shared Variables")]
-    [SerializeField] private SharedFloat            _health        = null;
-    [SerializeField] private SharedFloat            _stamina       = null;
-    [SerializeField] private SharedFloat            _infection     = null;
-    [SerializeField] private SharedFloat            _flashlight    = null;
-    [SerializeField] private SharedFloat            _nightVision   = null;
-    [SerializeField] private SharedString           _interactionString = null;
-    [SerializeField] private SharedString           _transcriptString  = null;
+    [Header("UI Images")] [SerializeField] private Image _crosshair = null;
+
+    [Header("PDA References")] [SerializeField]
+    private GameObject _pdaOverlay = null;
+
+    [SerializeField] private Text _pdaPerson = null;
+    [SerializeField] private Text _pdaSubject = null;
+    [SerializeField] private Slider _pdaAudioTimeline = null;
+
+    [Header("Shared Variables")] [SerializeField]
+    private SharedFloat _health = null;
+
+    [SerializeField] private SharedFloat _stamina = null;
+    [SerializeField] private SharedFloat _infection = null;
+    [SerializeField] private SharedFloat _flashlight = null;
+    [SerializeField] private SharedFloat _nightVision = null;
+    [SerializeField] private SharedString _interactionString = null;
+    [SerializeField] private SharedString _transcriptString = null;
     [SerializeField] private SharedTimedStringQueue _notificationQueue = null;
-    [SerializeField] private SharedVector3          _crosshairPosition = null;
-    [SerializeField] private SharedSprite           _crosshairSprite = null;
-    [SerializeField] private SharedFloat            _crosshairAlpha = null;
+    [SerializeField] private SharedVector3 _crosshairPosition = null;
+    [SerializeField] private SharedSprite _crosshairSprite = null;
+    [SerializeField] private SharedFloat _crosshairAlpha = null;
 
-    [Header("Additional Settings")]
-    [SerializeField] private Image 		_screenFade             =	null;
-    [SerializeField] private Sprite     _defaultCrosshair       =   null;
-    [SerializeField] private float      _crosshairAlphaScale    =   1.0f;
+    [Header("Additional Settings")] [SerializeField]
+    private Image _screenFade = null;
+
+    [SerializeField] private Sprite _defaultCrosshair = null;
+    [SerializeField] private float _crosshairAlphaScale = 1.0f;
 
     // Internals
     float _currentFadeLevel = 1.0f;
-	IEnumerator _coroutine	= null;
+    IEnumerator _coroutine = null;
 
-	public void Start()
-	{
-		if (_screenFade)
-		{
-			Color color = _screenFade.color;
-			color.a = _currentFadeLevel;
-			_screenFade.color = color;
-		}
-	}
+    public void Start() {
+        if (_screenFade) {
+            Color color = _screenFade.color;
+            color.a = _currentFadeLevel;
+            _screenFade.color = color;
+        }
+    }
 
-	public void Fade ( float seconds, ScreenFadeType direction )
-	{
-		if (_coroutine!=null) StopCoroutine(_coroutine); 
-		float targetFade  = 0.0f;;
+    public void Fade(float seconds, ScreenFadeType direction) {
+        if (_coroutine != null) StopCoroutine(_coroutine);
+        float targetFade = 0.0f;
+        ;
 
-		switch (direction)
-		{
-			case ScreenFadeType.FadeIn:
-			targetFade = 0.0f;
-			break;
+        switch (direction) {
+            case ScreenFadeType.FadeIn:
+                targetFade = 0.0f;
+                break;
 
-			case ScreenFadeType.FadeOut:
-			targetFade = 1.0f;
-			break;
-		}
+            case ScreenFadeType.FadeOut:
+                targetFade = 1.0f;
+                break;
+        }
 
-		_coroutine = FadeInternal( seconds, targetFade);
-		StartCoroutine(_coroutine);
-	}
+        _coroutine = FadeInternal(seconds, targetFade);
+        StartCoroutine(_coroutine);
+    }
 
 
-	IEnumerator FadeInternal( float seconds, float targetFade )
-	{
-		if (!_screenFade) yield break;
+    IEnumerator FadeInternal(float seconds, float targetFade) {
+        if (!_screenFade) yield break;
 
-		float timer = 0;
-		float srcFade = _currentFadeLevel;
-		Color oldColor = _screenFade.color;
-		if (seconds<0.1f) seconds = 0.1f;
+        float timer = 0;
+        float srcFade = _currentFadeLevel;
+        Color oldColor = _screenFade.color;
+        if (seconds < 0.1f) seconds = 0.1f;
 
-		while (timer<seconds)
-		{
-			timer+=Time.deltaTime;
-			_currentFadeLevel = Mathf.Lerp( srcFade, targetFade, timer/seconds );
-			oldColor.a = _currentFadeLevel;
-			_screenFade.color = oldColor;
-			yield return null;
-		}
+        while (timer < seconds) {
+            timer += Time.deltaTime;
+            _currentFadeLevel = Mathf.Lerp(srcFade, targetFade, timer / seconds);
+            oldColor.a = _currentFadeLevel;
+            _screenFade.color = oldColor;
+            yield return null;
+        }
 
-		oldColor.a = _currentFadeLevel = targetFade;
-		_screenFade.color = oldColor;
-	}
+        oldColor.a = _currentFadeLevel = targetFade;
+        _screenFade.color = oldColor;
+    }
 
-    void Update()
-    {
-       
+    void Update() {
         if (_healthSlider != null && _health != null)
             _healthSlider.value = _health.value;
 
@@ -131,22 +130,19 @@ public class PlayerHUD : MonoBehaviour
         if (_notificationText != null && _notificationQueue != null)
             _notificationText.text = _notificationQueue.text;
 
-        if (_crosshair && _crosshairPosition )
-        {
+        if (_crosshair && _crosshairPosition) {
             _crosshair.transform.position = _crosshairPosition.value;
-          
-          
         }
 
         if (_crosshairSprite)
             _crosshair.sprite = _crosshairSprite.value == null ? _defaultCrosshair : _crosshairSprite.value;
 
         if (_crosshairAlpha)
-            _crosshair.color = new Color(_crosshair.color.r, _crosshair.color.g, _crosshair.color.b, _crosshairAlpha.value * _crosshairAlphaScale);
+            _crosshair.color = new Color(_crosshair.color.r, _crosshair.color.g, _crosshair.color.b,
+                _crosshairAlpha.value * _crosshairAlphaScale);
     }
 
-    public void OnBeginAudio(InventoryItemAudio audioItem)
-    {
+    public void OnBeginAudio(InventoryItemAudio audioItem) {
         if (!audioItem) return;
 
         if (_pdaOverlay) _pdaOverlay.SetActive(true);
@@ -154,13 +150,11 @@ public class PlayerHUD : MonoBehaviour
         if (_pdaSubject) _pdaSubject.text = audioItem.subject;
     }
 
-    public void OnUpdateAudio(float time)
-    {
+    public void OnUpdateAudio(float time) {
         if (_pdaAudioTimeline) _pdaAudioTimeline.value = time;
     }
 
-    public void OnEndAudio()
-    {
+    public void OnEndAudio() {
         if (_pdaOverlay) _pdaOverlay.SetActive(false);
     }
 }

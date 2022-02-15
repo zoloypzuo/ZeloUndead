@@ -5,8 +5,8 @@ using UnityEngine;
 public class CollectableAudio : CollectableItem
 {
     // Inpsector Assigned Variables
-    [SerializeField] protected Renderer     _screenRenderer = null;         
-    [SerializeField] protected Color        _emissiveColor  = Color.gray;
+    [SerializeField] protected Renderer _screenRenderer = null;
+    [SerializeField] protected Color _emissiveColor = Color.gray;
 
     // Internal
     protected InventoryItemAudio _audioItem = null;
@@ -16,8 +16,7 @@ public class CollectableAudio : CollectableItem
     // Desc :   Caches a reference to the associated InventoryAudioItem and sets the texture
     //          of that audio item.
     // ---------------------------------------------------------------------------------------------
-    protected override void Start()
-    {
+    protected override void Start() {
         // Call Base Class to register as an interactive item
         base.Start();
 
@@ -25,10 +24,8 @@ public class CollectableAudio : CollectableItem
         _audioItem = _inventoryItem as InventoryItemAudio;
 
         // If we have an audio item reference
-        if (_audioItem)
-        {
-            if (_screenRenderer)
-            {
+        if (_audioItem) {
+            if (_screenRenderer) {
                 _screenRenderer.material.SetTexture("_EmissionMap", _audioItem.image);
                 _screenRenderer.material.SetColor("_EmissionColor", _emissiveColor);
             }
@@ -39,16 +36,14 @@ public class CollectableAudio : CollectableItem
     // Name :   GetText (Override)
     // Desc :   Returns the Interactive Text for this Ammo
     // --------------------------------------------------------------------------------------------
-    public override string GetText()
-    {
+    public override string GetText() {
         // If text not generated yet
-        if (_interactiveText == null)
-        {
-          if (!_audioItem)
-             _interactiveText = "Audio Log: Empty";
-          else
-             _interactiveText = "Audio Log: " + _audioItem.person + "\n"+_audioItem.subject + "\n" + _audioItem.pickupText;
-           
+        if (_interactiveText == null) {
+            if (!_audioItem)
+                _interactiveText = "Audio Log: Empty";
+            else
+                _interactiveText = "Audio Log: " + _audioItem.person + "\n" + _audioItem.subject + "\n" +
+                                   _audioItem.pickupText;
         }
 
         // Return text
@@ -62,17 +57,14 @@ public class CollectableAudio : CollectableItem
     //			download the data (remove disk) leaving the PDA in the scene but no
     //			longer functional
     // ------------------------------------------------------------------------------
-    public override void Activate(CharacterManager characterManager)
-    {
+    public override void Activate(CharacterManager characterManager) {
         // This is an empty PDA so nothing to take
         if (!_audioItem) return;
 
         // We need a valid character manager and inventory manager
-        if (_inventory!=null)
-        {
+        if (_inventory != null) {
             // Add this item to the inventory
-            if (_inventory.AddItem(this, true))
-            { 
+            if (_inventory.AddItem(this, true)) {
                 // Set Empty Text
                 _interactiveText = "Audio Log: Empty";
 
@@ -80,8 +72,7 @@ public class CollectableAudio : CollectableItem
                 _inventoryItem = _audioItem = null;
 
                 // Disable screen Texture
-                if (_screenRenderer)
-                {
+                if (_screenRenderer) {
                     _screenRenderer.material.SetTexture("_EmissionMap", null);
                     _screenRenderer.material.SetColor("_EmissionColor", Color.black);
                 }

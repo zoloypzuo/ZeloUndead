@@ -14,35 +14,28 @@ public class AIZombieDontReanimateOverrideZone : MonoBehaviour
     protected Collider _collider = null;
 
     // Start is called before the first frame update
-    void Start()
-    {
+    void Start() {
         _collider = GetComponent<Collider>();
         _collider.isTrigger = true;
-       
     }
 
-    protected void OnTriggerEnter(Collider other)
-    {
-        if (GameSceneManager.instance)
-        {
-           AIZombieStateMachine _stateMachine =  GameSceneManager.instance.GetAIStateMachine(other.GetInstanceID()) as AIZombieStateMachine;
-           if (_stateMachine)
-            {
+    protected void OnTriggerEnter(Collider other) {
+        if (GameSceneManager.instance) {
+            AIZombieStateMachine _stateMachine =
+                GameSceneManager.instance.GetAIStateMachine(other.GetInstanceID()) as AIZombieStateMachine;
+            if (_stateMachine) {
                 _stateMachine.DontReanimate(true);
             }
         }
     }
 
-    protected void OnTriggerExit(Collider other)
-    {
-        if (GameSceneManager.instance)
-        {
-            AIZombieStateMachine _stateMachine = GameSceneManager.instance.GetAIStateMachine(other.GetInstanceID()) as AIZombieStateMachine;
-            if (_stateMachine)
-            {
+    protected void OnTriggerExit(Collider other) {
+        if (GameSceneManager.instance) {
+            AIZombieStateMachine _stateMachine =
+                GameSceneManager.instance.GetAIStateMachine(other.GetInstanceID()) as AIZombieStateMachine;
+            if (_stateMachine) {
                 _stateMachine.DontReanimate(false);
             }
         }
     }
-
 }

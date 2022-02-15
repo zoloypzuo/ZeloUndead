@@ -7,28 +7,27 @@ using System.Collections;
 //				enter its trigger via the AIStateMachine's OnTriggerEvent
 //				method.
 // ----------------------------------------------------------------------
-public class AISensor : MonoBehaviour 
+public class AISensor : MonoBehaviour
 {
-	// Private
-	private AIStateMachine	_parentStateMachine	=	null;
-	public AIStateMachine parentStateMachine{ set{ _parentStateMachine = value; }}
+    // Private
+    private AIStateMachine _parentStateMachine = null;
 
-	void OnTriggerEnter( Collider col )
-	{
-		if (_parentStateMachine!=null)
-			_parentStateMachine.OnTriggerEvent ( AITriggerEventType.Enter,col );
-	}
+    public AIStateMachine parentStateMachine {
+        set { _parentStateMachine = value; }
+    }
 
-	void OnTriggerStay( Collider col )
-	{
-		if (_parentStateMachine!=null)
-			_parentStateMachine.OnTriggerEvent ( AITriggerEventType.Stay, col );
-	}
+    void OnTriggerEnter(Collider col) {
+        if (_parentStateMachine != null)
+            _parentStateMachine.OnTriggerEvent(AITriggerEventType.Enter, col);
+    }
 
-	void OnTriggerExit( Collider col )
-	{
-		if (_parentStateMachine!=null)
-			_parentStateMachine.OnTriggerEvent ( AITriggerEventType.Exit,  col );
-	}
+    void OnTriggerStay(Collider col) {
+        if (_parentStateMachine != null)
+            _parentStateMachine.OnTriggerEvent(AITriggerEventType.Stay, col);
+    }
 
+    void OnTriggerExit(Collider col) {
+        if (_parentStateMachine != null)
+            _parentStateMachine.OnTriggerEvent(AITriggerEventType.Exit, col);
+    }
 }

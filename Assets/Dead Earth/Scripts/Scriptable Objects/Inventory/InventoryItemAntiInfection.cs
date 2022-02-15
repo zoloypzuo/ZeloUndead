@@ -9,21 +9,22 @@ public class InventoryItemAntiInfection : InventoryItem
     [Header("Anti-Infection Properties")]
     [Tooltip("The amount Infection is reduced on consumption.")]
     [Range(0.0f, 100.0f)]
-    [SerializeField] protected float _reductionAmount = 0.0f;
+    [SerializeField]
+    protected float _reductionAmount = 0.0f;
 
-    [Header("Shared Variables")]
-    [Tooltip("The SharedFloat that receives the Reduction.")]
-    [SerializeField] protected SharedFloat _recipient = null;
+    [Header("Shared Variables")] [Tooltip("The SharedFloat that receives the Reduction.")] [SerializeField]
+    protected SharedFloat _recipient = null;
 
     // Public Properties
-    public float reductionAmount { get { return _reductionAmount; } }
+    public float reductionAmount {
+        get { return _reductionAmount; }
+    }
 
     // --------------------------------------------------------------------------------------------
     // Name :   Use
     // Desc :   Called when the item is consumed from the inventory
     // --------------------------------------------------------------------------------------------
-    public override InventoryItem Use(Vector3 position, bool playAudio = true, Inventory inventory = null)
-    {   
+    public override InventoryItem Use(Vector3 position, bool playAudio = true, Inventory inventory = null) {
         // Add health
         if (_recipient)
             _recipient.value = Mathf.Max(_recipient.value - _reductionAmount, 0.0f);

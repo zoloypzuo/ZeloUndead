@@ -11,12 +11,10 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Scriptable Objects/Shared Collections/Timed String Queue")]
 public class SharedTimedStringQueue : ScriptableObject, ISerializationCallbackReceiver
 {
-    [SerializeField]
-    [TextArea(3, 10)]
-    protected string _noteToDeveloper = "An automated timed message delivery queue.\n\nUsage:-\n\nQueue.Enqueue( 'My Message');\n\nDebug.Log(Queue.text);\n\nA CoroutineRunner Instance must exist in the current scene.";
+    [SerializeField] [TextArea(3, 10)] protected string _noteToDeveloper =
+        "An automated timed message delivery queue.\n\nUsage:-\n\nQueue.Enqueue( 'My Message');\n\nDebug.Log(Queue.text);\n\nA CoroutineRunner Instance must exist in the current scene.";
 
-    [SerializeField]
-    protected float _dequeueDelay = 3.5f;
+    [SerializeField] protected float _dequeueDelay = 3.5f;
 
     // Internals
     protected float _nextDequeueTime = 0.0f;
@@ -25,10 +23,15 @@ public class SharedTimedStringQueue : ScriptableObject, ISerializationCallbackRe
     protected string _text = null;
 
     // Return currently active text
-    public string text { get { return _text; } }
+    public string text {
+        get { return _text; }
+    }
 
     // pause the queue
-    public bool paused { get { return _paused; } set { _paused = value; } }
+    public bool paused {
+        get { return _paused; }
+        set { _paused = value; }
+    }
 
     // A string float queue
     private Queue<string> _queue = new Queue<string>();
@@ -37,42 +40,34 @@ public class SharedTimedStringQueue : ScriptableObject, ISerializationCallbackRe
     // Name :   Enqueue
     // Desc :   Adds a string to the message queue
     // --------------------------------------------------------------------------------------------
-    public void Enqueue(string message)
-    {
-        if (CoroutineRunner.Instance == null)
-        {
+    public void Enqueue(string message) {
+        if (CoroutineRunner.Instance == null) {
             _text = "Timed Text Queue Error: No CoroutineRunner Object present";
             return;
         }
+
         _queue.Enqueue(message);
 
-        if (_coroutine == null)
-        {
+        if (_coroutine == null) {
             _coroutine = QueueProcessor();
             CoroutineRunner.Instance.StartCoroutine(_coroutine);
         }
-
-       
     }
 
     // --------------------------------------------------------------------------------------------
     // Name :   QueueProcessor
     // Desc :   Coroutine that constantly processes the queue and its timing
     // --------------------------------------------------------------------------------------------
-    protected IEnumerator QueueProcessor()
-    {
+    protected IEnumerator QueueProcessor() {
         // Loop while there are messages in the queue
-        while (true)
-        {
+        while (true) {
             // If we are no paused
-            if (!paused)
-            {
+            if (!paused) {
                 // Update timer (using unscaled time)
                 _nextDequeueTime -= Time.unscaledDeltaTime;
 
                 // Is it time for another dequeue
-                if (_nextDequeueTime < 0.0f)
-                {
+                if (_nextDequeueTime < 0.0f) {
                     // Nothing in the queue so break out of while loop and 
                     // end corotuine
                     if (_queue.Count == 0) break;
@@ -100,11 +95,15 @@ public class SharedTimedStringQueue : ScriptableObject, ISerializationCallbackRe
     // Name : Count
     // Desc : Returns the number of string in the queue
     // --------------------------------------------------------------------------------------------
-    public int Count()
-    {
+    public int Count() {
         return _queue.Count;
     }
 
-    public void OnAfterDeserialize() { _queue.Clear(); _text = null; }
-    public void OnBeforeSerialize() { }
+    public void OnAfterDeserialize() {
+        _queue.Clear();
+        _text = null;
+    }
+
+    public void OnBeforeSerialize() {
+    }
 }

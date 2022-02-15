@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu( menuName ="Scriptable Objects/Shared Variables/Shared String")]
+[CreateAssetMenu(menuName = "Scriptable Objects/Shared Variables/Shared String")]
 public class SharedString : ScriptableObject, ISerializationCallbackReceiver
 {
-    [SerializeField]
-    private string _value = null;
+    [SerializeField] private string _value = null;
     private string _runtimeValue = null;
 
-    public string value
-    {
+    public string value {
         get { return this._runtimeValue; }
-        set { this._runtimeValue = value;}
+        set { this._runtimeValue = value; }
     }
-    public void OnAfterDeserialize() { _runtimeValue = _value; }
-    public void OnBeforeSerialize() { }
+
+    public void OnAfterDeserialize() {
+        _runtimeValue = _value;
+    }
+
+    public void OnBeforeSerialize() {
+    }
 }

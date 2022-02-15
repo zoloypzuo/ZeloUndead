@@ -4,7 +4,12 @@ using System.Collections.Generic;
 
 // Display Mode that the Custom Inspector of an AIWaypointNetwork
 // component can be in
-public enum PathDisplayMode { None, Connections, Paths }
+public enum PathDisplayMode
+{
+    None,
+    Connections,
+    Paths
+}
 
 // -------------------------------------------------------------------
 // CLASS	:	AIWaypointNetwork
@@ -12,16 +17,12 @@ public enum PathDisplayMode { None, Connections, Paths }
 //				reference to a transform. Also contains settings
 //				for the Custom Inspector
 // ------------------------------------------------------------------
-public class AIWaypointNetwork : MonoBehaviour 
-{		
-	[HideInInspector]												
-	public PathDisplayMode DisplayMode = PathDisplayMode.Connections;	// Current Display Mode
-	[HideInInspector]	
-	public int UIStart 	= 0;											// Start wayopoint index for Paths mode
-	[HideInInspector]
-	public int UIEnd	= 0;											// End waypoint index for Paths mode
+public class AIWaypointNetwork : MonoBehaviour
+{
+    [HideInInspector] public PathDisplayMode DisplayMode = PathDisplayMode.Connections; // Current Display Mode
+    [HideInInspector] public int UIStart = 0; // Start wayopoint index for Paths mode
+    [HideInInspector] public int UIEnd = 0; // End waypoint index for Paths mode
 
-	// List of Transform references
-	public List<Transform> Waypoints   = new List<Transform>();
-
+    // List of Transform references
+    public List<Transform> Waypoints = new List<Transform>();
 }

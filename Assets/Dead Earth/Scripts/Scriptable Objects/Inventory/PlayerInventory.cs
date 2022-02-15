@@ -7,38 +7,43 @@ using UnityEngine;
 public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 {
     // Serialized Fields
-    [Header("Mount Configuration and Starting Items")]
-    [SerializeField] protected List<InventoryWeaponMountInfo>   _weaponMounts   = new List<InventoryWeaponMountInfo>();
-    [SerializeField] protected List<InventoryAmmoMountInfo>     _ammoMounts     = new List<InventoryAmmoMountInfo>();
-    [SerializeField] protected List<InventoryBackpackMountInfo> _backpackMounts = new List<InventoryBackpackMountInfo>();
+    [Header("Mount Configuration and Starting Items")] [SerializeField]
+    protected List<InventoryWeaponMountInfo> _weaponMounts = new List<InventoryWeaponMountInfo>();
 
-    [Header("Audio Recordings")]
-    [SerializeField] protected bool                      _autoPlayOnPickup  = true;
-    [SerializeField] protected List<InventoryItemAudio>  _audioRecordings   = new List<InventoryItemAudio>();
+    [SerializeField] protected List<InventoryAmmoMountInfo> _ammoMounts = new List<InventoryAmmoMountInfo>();
 
-    [Header("Shared Variables")]
-    [SerializeField] protected SharedTimedStringQueue    _notificationQueue = null;
+    [SerializeField]
+    protected List<InventoryBackpackMountInfo> _backpackMounts = new List<InventoryBackpackMountInfo>();
 
-    [Header("Shared Variables - Broadcasters")]
-    [SerializeField] protected SharedVector3 _playerPosition = null;
+    [Header("Audio Recordings")] [SerializeField]
+    protected bool _autoPlayOnPickup = true;
+
+    [SerializeField] protected List<InventoryItemAudio> _audioRecordings = new List<InventoryItemAudio>();
+
+    [Header("Shared Variables")] [SerializeField]
+    protected SharedTimedStringQueue _notificationQueue = null;
+
+    [Header("Shared Variables - Broadcasters")] [SerializeField]
+    protected SharedVector3 _playerPosition = null;
+
     [SerializeField] protected SharedVector3 _playerDirection = null;
 
     // Private
     // Runtime Mount Lists
-    protected List<InventoryWeaponMountInfo>            _weapons    = new List<InventoryWeaponMountInfo>();
-    protected List<InventoryAmmoMountInfo>              _ammo       = new List<InventoryAmmoMountInfo>();
-    protected List<InventoryBackpackMountInfo>          _backpack   = new List<InventoryBackpackMountInfo>();
-    protected List<InventoryItemAudio>                  _recordings = new List<InventoryItemAudio>();
+    protected List<InventoryWeaponMountInfo> _weapons = new List<InventoryWeaponMountInfo>();
+    protected List<InventoryAmmoMountInfo> _ammo = new List<InventoryAmmoMountInfo>();
+    protected List<InventoryBackpackMountInfo> _backpack = new List<InventoryBackpackMountInfo>();
+    protected List<InventoryItemAudio> _recordings = new List<InventoryItemAudio>();
 
     // The index of a recording currently being played
     protected int _activeAudioRecordingIndex = -1;
-   
+
     // ISerializationCallbackReceiver
-    public void OnBeforeSerialize() { }
-    
+    public void OnBeforeSerialize() {
+    }
+
     // Public Propeties
-    public override bool autoPlayOnPickup
-    {
+    public override bool autoPlayOnPickup {
         get { return _autoPlayOnPickup; }
         set { _autoPlayOnPickup = value; }
     }
@@ -51,8 +56,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Note :   This has to be a deep copy as having two seperate lists referencing the same
     //          Mount objects will still mutate the original data.
     // --------------------------------------------------------------------------------------------
-    public void OnAfterDeserialize()
-    {
+    public void OnAfterDeserialize() {
         // Clear our runtime lists
         _weapons.Clear();
         _ammo.Clear();
@@ -60,8 +64,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         _recordings.Clear();
 
         // Clone inspector lists into runtime lists
-        foreach (InventoryWeaponMountInfo info in _weaponMounts)
-        {
+        foreach (InventoryWeaponMountInfo info in _weaponMounts) {
             InventoryWeaponMountInfo clone = new InventoryWeaponMountInfo();
             clone.Condition = info.Condition;
             clone.InGunRounds = info.InGunRounds;
@@ -72,23 +75,20 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
             if (_weapons.Count == 2) break;
         }
 
-        foreach (InventoryAmmoMountInfo info in _ammoMounts)
-        {
+        foreach (InventoryAmmoMountInfo info in _ammoMounts) {
             InventoryAmmoMountInfo clone = new InventoryAmmoMountInfo();
             clone.Ammo = info.Ammo;
             clone.Rounds = info.Rounds;
             _ammo.Add(clone);
         }
 
-        foreach (InventoryBackpackMountInfo info in _backpackMounts)
-        {
+        foreach (InventoryBackpackMountInfo info in _backpackMounts) {
             InventoryBackpackMountInfo clone = new InventoryBackpackMountInfo();
             clone.Item = info.Item;
             _backpack.Add(clone);
         }
 
-        foreach (InventoryItemAudio recording in _audioRecordings)
-        {
+        foreach (InventoryItemAudio recording in _audioRecordings) {
             _recordings.Add(recording);
         }
 
@@ -100,8 +100,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   GetWeapon
     // Desc :   Returns all information about the weapon at the requested mount
     // --------------------------------------------------------------------------------------------
-    public override InventoryWeaponMountInfo GetWeapon(int mountIndex)
-    {
+    public override InventoryWeaponMountInfo GetWeapon(int mountIndex) {
         // In my implementation I allow only two weapon mounts but
         // your own derived classes may choose not to follow this pattern
         if (mountIndex < 0 || mountIndex > 1 || mountIndex >= _weapons.Count) return null;
@@ -114,8 +113,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   GetAmmo
     // Desc :   Returns all information about the ammo at the specified ammo mount
     // --------------------------------------------------------------------------------------------
-    public override InventoryAmmoMountInfo GetAmmo(int mountIndex)
-    {
+    public override InventoryAmmoMountInfo GetAmmo(int mountIndex) {
         if (mountIndex < 0 || mountIndex >= _ammo.Count) return null;
         return _ammo[mountIndex];
     }
@@ -124,8 +122,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   GetBackpack
     // Desc :   Returns information about the item at the specified mount in the backpack
     // --------------------------------------------------------------------------------------------
-    public override InventoryBackpackMountInfo GetBackpack(int mountIndex)
-    {
+    public override InventoryBackpackMountInfo GetBackpack(int mountIndex) {
         if (mountIndex < 0 || mountIndex >= _backpack.Count) return null;
         return _backpack[mountIndex];
     }
@@ -134,8 +131,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   GetAudioRecording
     // Desc :   Returns a recording at the specified index
     // --------------------------------------------------------------------------------------------
-    public override InventoryItemAudio GetAudioRecording(int recordingIndex)
-    {
+    public override InventoryItemAudio GetAudioRecording(int recordingIndex) {
         if (recordingIndex < 0 || recordingIndex >= _recordings.Count) return null;
         return _recordings[recordingIndex];
     }
@@ -144,8 +140,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   GetAudioRecordingCount
     // Desc :   Returns the number of Audio Logs in the list
     // --------------------------------------------------------------------------------------------
-    public override int GetAudioRecordingCount()
-    {
+    public override int GetAudioRecordingCount() {
         return _recordings.Count;
     }
 
@@ -153,8 +148,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   GetActiveAudioRecording
     // Desc :   Return the index of any Audio Recording currently playing.
     // --------------------------------------------------------------------------------------------
-    public override int GetActiveAudioRecording()
-    {
+    public override int GetActiveAudioRecording() {
         return _activeAudioRecordingIndex;
     }
 
@@ -162,13 +156,11 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   PlayAudioRecording
     // Desc :   Instructs audio player to play the Audio Log and sets the current active index
     // --------------------------------------------------------------------------------------------
-    public override bool PlayAudioRecording(int recordingIndex)
-    {
+    public override bool PlayAudioRecording(int recordingIndex) {
         if (recordingIndex < 0 || recordingIndex >= _recordings.Count) return false;
 
         InventoryAudioPlayer audioPlayer = InventoryAudioPlayer.instance;
-        if (audioPlayer)
-        {
+        if (audioPlayer) {
             audioPlayer.OnEndAudio.RemoveListener(StopAudioListener);
             audioPlayer.OnEndAudio.AddListener(StopAudioListener);
 
@@ -183,8 +175,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   StopAudioListener
     // Desc :   Called by the AudioPlayer when the audio stops
     // ---------------------------------------------------------------------------------------------
-    protected void StopAudioListener()
-    {
+    protected void StopAudioListener() {
         InventoryAudioPlayer audioPlayer = InventoryAudioPlayer.instance;
         if (audioPlayer)
             audioPlayer.OnEndAudio.RemoveListener(StopAudioListener);
@@ -196,21 +187,18 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Desc :   Instructs the Audio Player to stop playing it's audio. Triggers a manual stop of
     //          the audio player.
     // --------------------------------------------------------------------------------------------
-    public override void StopAudioRecording()
-    {
+    public override void StopAudioRecording() {
         InventoryAudioPlayer audioPlayer = InventoryAudioPlayer.instance;
         if (audioPlayer)
             audioPlayer.StopAudio();
     }
 
-   
 
     // --------------------------------------------------------------------------------------------
     // Name :   DropAmmoItem
     // Desc :   Drop the item assign to the specified mount in the Ammo Belt
     // --------------------------------------------------------------------------------------------
-    public override void DropAmmoItem(int mountIndex, bool playAudio = true)
-    {
+    public override void DropAmmoItem(int mountIndex, bool playAudio = true) {
         if (mountIndex < 0 || mountIndex >= _backpack.Count) return;
 
         // Chck we have a valid BackPack mount in the inventory
@@ -224,8 +212,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         CollectableAmmo sceneAmmo = itemMount.Ammo.Drop(position, playAudio) as CollectableAmmo;
 
         // Was a CollectableAmmo object created in the scene
-        if (sceneAmmo)
-        {
+        if (sceneAmmo) {
             // if so copy over instance data from mount into proxy
             sceneAmmo.rounds = _ammo[mountIndex].Rounds;
         }
@@ -239,8 +226,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   DropBackpackItem
     // Desc :   Drop the item at the specified mount in the Backpack
     // --------------------------------------------------------------------------------------------
-    public override void DropBackpackItem(int mountIndex, bool playAudio = true)
-    {
+    public override void DropBackpackItem(int mountIndex, bool playAudio = true) {
         if (mountIndex < 0 || mountIndex >= _backpack.Count) return;
 
         // Chck we have a valid BackPack mount in the inventory
@@ -260,8 +246,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   DropWeaponItem
     // Desc :   Drop the weapon at the specified mount into the scene
     // --------------------------------------------------------------------------------------------
-    public override void DropWeaponItem(int mountIndex, bool playAudio = true)
-    {
+    public override void DropWeaponItem(int mountIndex, bool playAudio = true) {
         if (mountIndex < 0 || mountIndex >= _weapons.Count) return;
 
         // Chck we have a valid BackPack mount in the inventory
@@ -275,8 +260,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         Vector3 position = _playerPosition != null ? _playerPosition.value : Vector3.zero;
         position += _playerDirection != null ? _playerDirection.value : Vector3.zero;
         CollectableWeapon sceneWeapon = weapon.Drop(position, playAudio) as CollectableWeapon;
-        if (sceneWeapon)
-        {
+        if (sceneWeapon) {
             // Copy over instance data from mount into proxy
             sceneWeapon.condition = itemMount.Condition;
             sceneWeapon.rounds = itemMount.InGunRounds;
@@ -293,8 +277,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   UseBackpackItem
     // Desc :   Uses a backpack item.
     // --------------------------------------------------------------------------------------------
-    public override bool UseBackpackItem(int mountIndex, bool playAudio = true)
-    {
+    public override bool UseBackpackItem(int mountIndex, bool playAudio = true) {
         // Is the selected slot valid to be consumed
         if (mountIndex < 0 || mountIndex >= _backpack.Count) return false;
 
@@ -323,8 +306,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     //          We will want to play the audio when at the inventory screen but pass false to this
     //          function when calling from real time. 
     // --------------------------------------------------------------------------------------------
-    public override bool ReloadWeapon(int mountIndex, bool playAudio = true)
-    {
+    public override bool ReloadWeapon(int mountIndex, bool playAudio = true) {
         // Invalid mount index (This invetory supports only 2 weapon mounts
         if (mountIndex < 0 || mountIndex > 1) return false;
 
@@ -341,14 +323,12 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 
         // If its a Non-Partial Reload type then simply search the belt for a clip
         // with the most bullets
-        if (weapon.reloadType == InventoryWeaponReloadType.NonPartial)
-        {
+        if (weapon.reloadType == InventoryWeaponReloadType.NonPartial) {
             // Search for a clip in our belt that has the highest round count
             // that matches the ammoID of the gun
             int ammoMountCandidate = -1;
             int roundCount = -1;
-            for (int i = 0; i < _ammo.Count; i++)
-            {
+            for (int i = 0; i < _ammo.Count; i++) {
                 InventoryAmmoMountInfo ammoMountInfo = _ammo[i];
 
                 // If ammo at this mount is not the correct type of ammo skip it
@@ -356,8 +336,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 
                 // If the ammo we have found has more rounds than currently stored
                 // at then record this as the best candidate for a swap
-                if (ammoMountInfo.Rounds > roundCount)
-                {
+                if (ammoMountInfo.Rounds > roundCount) {
                     roundCount = ammoMountInfo.Rounds;
                     ammoMountCandidate = i;
                 }
@@ -380,8 +359,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 
             // If no rounds where in the gun before the reload, we have nothing to
             // swap with the mount so remove the item from the mount
-            if (oldInGunRounds == 0)
-            {
+            if (oldInGunRounds == 0) {
                 // Clear the mount
                 _ammo[ammoMountCandidate].Ammo = null;
 
@@ -389,31 +367,26 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
                 // to simulate the clip we have ejected from the gun
                 Vector3 position = _playerPosition != null ? _playerPosition.value : Vector3.zero;
                 position += _playerDirection != null ? _playerDirection.value : Vector3.zero;
-                CollectableAmmo sceneAmmo = ammo.Drop( position, playAudio) as CollectableAmmo;
+                CollectableAmmo sceneAmmo = ammo.Drop(position, playAudio) as CollectableAmmo;
 
                 // Now we must configure the scene ammo we just instantiated to reflect the number
                 // of rounds that was in the gun
-                if (sceneAmmo)
-                {
+                if (sceneAmmo) {
                     sceneAmmo.rounds = 0;
                 }
             }
             // Otherwise simply swap the the clip
-            else
-            {
+            else {
                 _ammo[ammoMountCandidate].Rounds = oldInGunRounds;
             }
         }
-        else
-        if (weapon.reloadType == InventoryWeaponReloadType.Partial)
-        {
+        else if (weapon.reloadType == InventoryWeaponReloadType.Partial) {
             // If the gun is full, abort reload
             int roundsWanted = weapon.ammoCapacity - weaponMountInfo.InGunRounds;
             if (roundsWanted < 1) return false;
 
             // Loop through items on ammo belt searching for the correct ammo type
-            for (int i = 0; i < _ammo.Count; i++)
-            {
+            for (int i = 0; i < _ammo.Count; i++) {
                 // If not the right type of ammo then continue
                 InventoryAmmoMountInfo ammoMountInfo = _ammo[i];
                 if (ammoMountInfo.Ammo != weapon.ammo) continue;
@@ -445,8 +418,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Desc : Adds an item to the inventory from a passed CollectableItem 
     // --------------------------------------------------------------------------------------------
 
-    public override bool AddItem(CollectableItem collectableItem, bool playAudio = true)
-    {
+    public override bool AddItem(CollectableItem collectableItem, bool playAudio = true) {
         // Can't add if passed null or the CollectableItem has no associated InventoryItem
         if (collectableItem == null || collectableItem.inventoryItem == null) return false;
 
@@ -454,8 +426,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         // add to the inventory and remove the item from the scene.
         InventoryItem invItem = collectableItem.inventoryItem;
 
-        switch (invItem.category)
-        {
+        switch (invItem.category) {
             // If its a standard backpack item
             case InventoryItemType.Consumable:
                 return AddBackpackItem(invItem, collectableItem, playAudio);
@@ -471,8 +442,8 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
             // Audio Stuff we will do later
             case InventoryItemType.Recording:
                 return AddRecordingItem(invItem as InventoryItemAudio, collectableItem as CollectableAudio, playAudio);
-
         }
+
         return false;
     }
 
@@ -480,10 +451,9 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   AddRecordingItem
     // Desc :   Adds an AudioRecording to the Inventory and begins playing is AutoPlay is enabled
     // --------------------------------------------------------------------------------------------
-    protected bool AddRecordingItem(InventoryItemAudio inventoryAudio, CollectableAudio collectableAudio, bool playAudio)
-    {
-        if (inventoryAudio)
-        {
+    protected bool AddRecordingItem(InventoryItemAudio inventoryAudio, CollectableAudio collectableAudio,
+        bool playAudio) {
+        if (inventoryAudio) {
             // Play the pickup sound
             inventoryAudio.Pickup(collectableAudio.transform.position, playAudio);
 
@@ -491,8 +461,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
             _recordings.Add(inventoryAudio);
 
             // Play on Pick if configured to do so
-            if (_autoPlayOnPickup)
-            {
+            if (_autoPlayOnPickup) {
                 // Tell Inventory to play this audio recording immediately
                 // This should be the one at end of the recordings list
                 PlayAudioRecording(_recordings.Count - 1);
@@ -513,14 +482,11 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   AddBackpackItem
     // Desc :   Searches for the first available Backpack Mount and assigns the passed item to it.
     // --------------------------------------------------------------------------------------------
-    protected bool AddBackpackItem(InventoryItem inventoryItem, CollectableItem collectableItem, bool playAudio)
-    {
+    protected bool AddBackpackItem(InventoryItem inventoryItem, CollectableItem collectableItem, bool playAudio) {
         // Search for empty mount in Backpack
-        for (int i = 0; i < _backpack.Count; i++)
-        {
+        for (int i = 0; i < _backpack.Count; i++) {
             // A free mount is one with no item assigned
-            if (_backpack[i].Item == null)
-            {
+            if (_backpack[i].Item == null) {
                 // Store this Item type at the mount
                 _backpack[i].Item = inventoryItem;
 
@@ -547,14 +513,11 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   AddAmmoItem
     // Desc :   Searches for the first available Ammo Mount and assigns the passed ammo to it.
     // --------------------------------------------------------------------------------------------
-    protected bool AddAmmoItem(InventoryItemAmmo inventoryItemAmmo, CollectableAmmo collectableAmmo, bool playAudio)
-    {
+    protected bool AddAmmoItem(InventoryItemAmmo inventoryItemAmmo, CollectableAmmo collectableAmmo, bool playAudio) {
         // Search for empty mount on ammo belt
-        for (int i = 0; i < _ammo.Count; i++)
-        {
+        for (int i = 0; i < _ammo.Count; i++) {
             // A free mount is one with no Ammo assigned (.Ammo==null)
-            if (_ammo[i].Ammo == null)
-            {
+            if (_ammo[i].Ammo == null) {
                 // Store this Ammo type at the mount
                 _ammo[i].Ammo = inventoryItemAmmo;
 
@@ -575,7 +538,8 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 
         // Broadcast that attempt was NOT successful
         if (_notificationQueue)
-            _notificationQueue.Enqueue("Could not pickup " + inventoryItemAmmo.inventoryName + "\nNo room in Ammo Belt");
+            _notificationQueue.Enqueue("Could not pickup " + inventoryItemAmmo.inventoryName +
+                                       "\nNo room in Ammo Belt");
 
         return false;
     }
@@ -590,9 +554,8 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Note :   In DeadEarth the listener is the CharacterManager's which handles syncing
     //          weapon animation.
     // --------------------------------------------------------------------------------------------
-    protected bool AddWeaponItem(InventoryItemWeapon inventoryItemWeapon, CollectableWeapon collectableWeapon, bool playAudio)
-    {
-        
+    protected bool AddWeaponItem(InventoryItemWeapon inventoryItemWeapon, CollectableWeapon collectableWeapon,
+        bool playAudio) {
         // Create a mount info object to describe the weapon and instance data we wish
         // to change to.
         InventoryWeaponMountInfo wmi = new InventoryWeaponMountInfo();
@@ -602,9 +565,9 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 
         // Invoke event so the object in charge of weapon switching and animation (our CharacterManager for example)
         // can set the process of switching in motion.
-        OnWeaponChange.Invoke( wmi);
+        OnWeaponChange.Invoke(wmi);
 
-        return true;    
+        return true;
     }
 
     // ----------------------------------------------------------------------------------
@@ -616,16 +579,15 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     //			AddItem to add a weapon to the inventory in a usual case.
     //			This function will be used by the FPS Arms Animation System.
     // -----------------------------------------------------------------------------------
-    public override void AssignWeapon(int mountIndex, InventoryWeaponMountInfo mountInfo)
-    {
-        if (mountInfo==null || mountInfo.Weapon==null) return;
+    public override void AssignWeapon(int mountIndex, InventoryWeaponMountInfo mountInfo) {
+        if (mountInfo == null || mountInfo.Weapon == null) return;
         if (mountIndex < 0 || mountIndex >= _weapons.Count) return;
 
         // Assign the new mount info
         _weapons[mountIndex] = mountInfo;
 
         // Play the pickup sound 
-        _weapons[mountIndex].Weapon.Pickup( _playerPosition !=null ? _playerPosition.value : Vector3.zero);
+        _weapons[mountIndex].Weapon.Pickup(_playerPosition != null ? _playerPosition.value : Vector3.zero);
 
         // And then notify them the new weapon has been added
         if (_notificationQueue)
@@ -638,18 +600,16 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     //          is passed for the second parameter this will include bullet at the weapon mount
     //          as well.
     // --------------------------------------------------------------------------------------------
-    public override int GetAvailableAmmo(InventoryItemAmmo ammo, AmmoAmountRequestType requestType = AmmoAmountRequestType.NoWeaponAmmo)
-    {
+    public override int GetAvailableAmmo(InventoryItemAmmo ammo,
+        AmmoAmountRequestType requestType = AmmoAmountRequestType.NoWeaponAmmo) {
         if (!ammo) return 0;
 
         // Sum all ammo of the correct type on the ammo belt
         int roundCount = 0;
 
         // If we want to inlcude ammo belt ammo
-        if (requestType != AmmoAmountRequestType.WeaponAmmoOnly)
-        {
-            for (int i = 0; i < _ammo.Count; i++)
-            {
+        if (requestType != AmmoAmountRequestType.WeaponAmmoOnly) {
+            for (int i = 0; i < _ammo.Count; i++) {
                 InventoryAmmoMountInfo ammoMountInfo = _ammo[i];
                 if (ammoMountInfo.Ammo != ammo) continue;
                 roundCount += ammoMountInfo.Rounds;
@@ -657,15 +617,14 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         }
 
         // If we want to include in gun rounds
-        if (requestType != AmmoAmountRequestType.NoWeaponAmmo)
-        {
-            for (int i = 0; i < 2; i++)
-            {
+        if (requestType != AmmoAmountRequestType.NoWeaponAmmo) {
+            for (int i = 0; i < 2; i++) {
                 InventoryWeaponMountInfo weaponMountInfo = _weapons[i];
                 if (weaponMountInfo.Weapon == null || weaponMountInfo.Weapon.ammo != ammo) continue;
                 roundCount += weaponMountInfo.InGunRounds;
             }
         }
+
         return roundCount;
     }
 
@@ -676,8 +635,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     //          in the case of a non ammunition weapon.
     // Return : The remaining ammo in the weapon
     // --------------------------------------------------------------------------------------------
-    public override int DecreaseAmmoInWeapon ( int mountIndex, int amount=1)
-    {
+    public override int DecreaseAmmoInWeapon(int mountIndex, int amount = 1) {
         // If mount Index is out of range return -1 (error)
         if (mountIndex < 0 || mountIndex >= _weapons.Count || _weapons[mountIndex] == null) return -1;
 
@@ -686,11 +644,10 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         if (wmi.Weapon == null) return 0;
 
         // If this is an ammunition fed weapon then let's check the ammo
-        if ( wmi.Weapon.weaponFeedType==InventoryWeaponFeedType.Ammunition)
-        {
+        if (wmi.Weapon.weaponFeedType == InventoryWeaponFeedType.Ammunition) {
             // Subtract the amount from the weapon
             wmi.InGunRounds = Mathf.Max(wmi.InGunRounds - amount, 0);
-          
+
             return wmi.InGunRounds;
         }
 
@@ -707,8 +664,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     //			only return true if a clip is found that contains MORE rounds
     //			than those currently in the Weapon Mount
     // --------------------------------------------------------------------------------------------
-    public override bool IsReloadAvailable(int weaponMountIndex)
-    {
+    public override bool IsReloadAvailable(int weaponMountIndex) {
         if (weaponMountIndex < 0 || weaponMountIndex >= _weapons.Count) return false;
 
         // Get the weapon mount and the weapon from that mount
@@ -725,17 +681,14 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
 
         // If its a Non-Partial Reload type then simply search the belt for a clip
         // with the most bullets
-        if (weapon.reloadType == InventoryWeaponReloadType.NonPartial)
-        {
+        if (weapon.reloadType == InventoryWeaponReloadType.NonPartial) {
             // Search for a clip in our belt that has the highest round count
             // that matches the ammo of the gun
             int roundCount = -1;
-            for (int i = 0; i < _ammo.Count; i++)
-            {
+            for (int i = 0; i < _ammo.Count; i++) {
                 InventoryAmmoMountInfo ammoMountInfo = _ammo[i];
                 if (ammoMountInfo.Ammo != weapon.ammo) continue;
-                if (ammoMountInfo.Rounds > roundCount)
-                {
+                if (ammoMountInfo.Rounds > roundCount) {
                     roundCount = ammoMountInfo.Rounds;
                 }
             }
@@ -747,12 +700,9 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
             // A clip has been found so return true to allow a reload to proceed
             return true;
         }
-        else
-        if (weapon.reloadType == InventoryWeaponReloadType.Partial)
-        {
+        else if (weapon.reloadType == InventoryWeaponReloadType.Partial) {
             // Loop through items on ammo belt searching for the correct ammo type
-            for (int i = 0; i < _ammo.Count; i++)
-            {
+            for (int i = 0; i < _ammo.Count; i++) {
                 // If not the right type of ammo then continue
                 InventoryAmmoMountInfo ammoMountInfo = _ammo[i];
                 if (ammoMountInfo.Ammo != weapon.ammo) continue;
@@ -767,38 +717,35 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         // Fall through case in case we add more reload types
         return false;
     }
-    
+
     // --------------------------------------------------------------------------------------------
     // Name :   Search
     // Desc :   Searches the Inventory for the FIRST item that matches the passed type and
     //          return the mount. Returns NULL if item type does not exist.
     // --------------------------------------------------------------------------------------------
-    public override InventoryMountInfo Search(InventoryItem matchItem)
-    {
+    public override InventoryMountInfo Search(InventoryItem matchItem) {
         // Don't be silly :)
         if (matchItem == null) return null;
 
         // Search backpack first
-        for (int i = 0; i < _backpack.Count; i++)
-        {
+        for (int i = 0; i < _backpack.Count; i++) {
             if (_backpack[i].Item == matchItem) return _backpack[i];
         }
 
         // ...then Ammo Belt
-        for (int i = 0; i < _ammo.Count; i++)
-        {
+        for (int i = 0; i < _ammo.Count; i++) {
             if (_ammo[i].Ammo == matchItem) return _ammo[i];
         }
 
         // ...then weapon's mounts
-        for (int i = 0; i < _weapons.Count; i++)
-        {
+        for (int i = 0; i < _weapons.Count; i++) {
             if (_weapons[i].Weapon == matchItem) return _weapons[i];
         }
 
         // Not found
         return null;
     }
+
     // --------------------------------------------------------------------------------------------
     // Name :   Remove
     // Desc :   Removes all items (from all mounts) of the specified type if found. 
@@ -806,27 +753,22 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     //          be instantiated in the scene, they will not have their drop handlers called.
     // Ret  :   Returns number of items removed
     // --------------------------------------------------------------------------------------------
-    public override int Remove(InventoryItem matchItem)
-    {
+    public override int Remove(InventoryItem matchItem) {
         // Don't be silly :)
         if (matchItem == null) return 0;
         int removeCount = 0;
 
         // Search backpack first
-        for (int i = 0; i < _backpack.Count; i++)
-        {
-            if (_backpack[i].Item == matchItem)
-            {
+        for (int i = 0; i < _backpack.Count; i++) {
+            if (_backpack[i].Item == matchItem) {
                 _backpack[i].Item = null;
                 removeCount++;
             }
         }
 
         // ...then Ammo Belt
-        for (int i = 0; i < _ammo.Count; i++)
-        {
-            if (_ammo[i].Ammo == matchItem)
-            {
+        for (int i = 0; i < _ammo.Count; i++) {
+            if (_ammo[i].Ammo == matchItem) {
                 _ammo[i].Ammo = null;
                 _ammo[i].Rounds = 0;
                 removeCount++;
@@ -834,10 +776,8 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         }
 
         // ...then weapon's mounts
-        for (int i = 0; i < _weapons.Count; i++)
-        {
-            if (_weapons[i].Weapon == matchItem)
-            {
+        for (int i = 0; i < _weapons.Count; i++) {
+            if (_weapons[i].Weapon == matchItem) {
                 _weapons[i].Weapon = null;
                 _weapons[i].Condition = 0;
                 _weapons[i].InGunRounds = 0;
@@ -849,14 +789,12 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
         return removeCount;
     }
 
-    
 
     // --------------------------------------------------------------------------------------------
     // Name : RemoveWeapon
     // Desc : Clears the specified Weapon Mount
     // --------------------------------------------------------------------------------------------
-    public override bool RemoveWeapon(int mountIndex)
-    {
+    public override bool RemoveWeapon(int mountIndex) {
         // Is there something to remove...if not return false
         if (mountIndex < 0 || mountIndex >= _weapons.Count || _weapons[mountIndex].Weapon == null) return false;
 
@@ -871,8 +809,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name : RemoveAmmo
     // Desc : Clears the specified Ammo Mount
     // --------------------------------------------------------------------------------------------
-    public override bool RemoveAmmo(int mountIndex)
-    {
+    public override bool RemoveAmmo(int mountIndex) {
         // Is there something to remove...if not return false
         if (mountIndex < 0 || mountIndex >= _ammo.Count || _ammo[mountIndex].Ammo == null) return false;
 
@@ -886,8 +823,7 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name : RemoveBackpack
     // Desc : Clears the specified Backpack Mount
     // --------------------------------------------------------------------------------------------
-    public override bool RemoveBackpack(int mountIndex)
-    {
+    public override bool RemoveBackpack(int mountIndex) {
         // Is there something to remove...if not return false
         if (mountIndex < 0 || mountIndex >= _backpack.Count || _backpack[mountIndex].Item == null) return false;
 
@@ -900,8 +836,15 @@ public class PlayerInventory : Inventory, ISerializationCallbackReceiver
     // Name :   MOUNT GETTERS
     // Desc :   Low-Level access to the underlying runtime mount lists.
     // --------------------------------------------------------------------------------------------
-    public override List<InventoryWeaponMountInfo>      GetAllWeapons()     { return _weapons; }
-    public override List<InventoryAmmoMountInfo>        GetAllAmmo()        { return _ammo; }
-    public override List<InventoryBackpackMountInfo>    GetAllBackpack()    { return _backpack; }
+    public override List<InventoryWeaponMountInfo> GetAllWeapons() {
+        return _weapons;
+    }
 
+    public override List<InventoryAmmoMountInfo> GetAllAmmo() {
+        return _ammo;
+    }
+
+    public override List<InventoryBackpackMountInfo> GetAllBackpack() {
+        return _backpack;
+    }
 }

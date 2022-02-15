@@ -11,13 +11,13 @@ using UnityEngine;
 public class ActivateFlashlightSMB : ArmsBaseSMB
 {
     // Inspector Assigned
-    public bool             Activate           = true;
-    public FlashlightType   FlashlightType     = FlashlightType.Primary;
+    public bool Activate = true;
+    public FlashlightType FlashlightType = FlashlightType.Primary;
 
     // Internals
-    protected int  _commandStream    = Animator.StringToHash("Command Stream");
-    protected int _flashlightHash    = Animator.StringToHash("Flashlight");
-    protected bool _done             = false;
+    protected int _commandStream = Animator.StringToHash("Command Stream");
+    protected int _flashlightHash = Animator.StringToHash("Flashlight");
+    protected bool _done = false;
 
     // --------------------------------------------------------------------------------------------
     // Name :   OnStateEnter
@@ -25,12 +25,11 @@ public class ActivateFlashlightSMB : ArmsBaseSMB
     //          so exactly 1 and only 1 toggle of the light can be performed in this animation.
     //          We also use this to activate the flashlight mesh (where applicable)
     // --------------------------------------------------------------------------------------------
-    override public void OnStateEnter(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex)
-    {
+    override public void OnStateEnter(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex) {
         // Activate the flashlight mesh
         if (CharacterManager)
             CharacterManager.ActivateFlashlightMesh_AnimatorCallback(true, FlashlightType);
-        
+
 
         // We haven't processed a command for this state yet
         _done = false;
@@ -44,29 +43,24 @@ public class ActivateFlashlightSMB : ArmsBaseSMB
     //          multiple times while the state is playing. This is a deliberate limitation put in
     //          this code for convenience. Listen to accompany lesson video for more info.
     // --------------------------------------------------------------------------------------------
-    override public void OnStateUpdate(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex)
-    {
-        if (!CharacterManager || _done ) return;
-        if (!animator.GetBool (_flashlightHash) && Activate) return;
+    override public void OnStateUpdate(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex) {
+        if (!CharacterManager || _done) return;
+        if (!animator.GetBool(_flashlightHash) && Activate) return;
         float commandValue = animator.GetFloat(_commandStream);
 
-        if (commandValue > 0.75f )
-        {
-            CharacterManager.ActivateFlashlightLight_AnimatorCallback( Activate, FlashlightType );
+        if (commandValue > 0.75f) {
+            CharacterManager.ActivateFlashlightLight_AnimatorCallback(Activate, FlashlightType);
             _done = true;
         }
-        
     }
 
     // --------------------------------------------------------------------------------------------
     // Name :   OnStateExit
     // Desc :   Called on the last frame. Used to disable the flashlight mesh.
     // --------------------------------------------------------------------------------------------
-    override public void OnStateExit(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex)
-    {
+    override public void OnStateExit(Animator animator, AnimatorStateInfo animStateInfo, int layerIndex) {
         // Disable the mesh and light ONLY if this state was being used for deactivation
-        if (CharacterManager && !Activate)
-        {
+        if (CharacterManager && !Activate) {
             CharacterManager.ActivateFlashlightMesh_AnimatorCallback(false, FlashlightType);
             CharacterManager.ActivateFlashlightLight_AnimatorCallback(false, FlashlightType);
         }

@@ -13,7 +13,7 @@ public class VectorShaker : ScriptableObject
 {
     // Inspector Assigned
     // The vector we wish to shake
-    [SerializeField] SharedVector3 _shakeVector    = null;
+    [SerializeField] SharedVector3 _shakeVector = null;
 
     // Internals
     protected IEnumerator _coroutine = null;
@@ -22,16 +22,14 @@ public class VectorShaker : ScriptableObject
     // Name :   ShakeVector
     // Desc :   Public API used to shake the vector
     // --------------------------------------------------------------------------------------------
-    public void ShakeVector(float duration, float magnitude, float damping = 1.0f)
-    {
+    public void ShakeVector(float duration, float magnitude, float damping = 1.0f) {
         if (duration < 0.001 || magnitude.Equals(0.0f)) return;
-        if (_shakeVector && CoroutineRunner.Instance)
-        {
+        if (_shakeVector && CoroutineRunner.Instance) {
             if (_coroutine != null)
                 CoroutineRunner.Instance.StopCoroutine(_coroutine);
 
 
-            _coroutine = Shake( duration,  magnitude, damping);
+            _coroutine = Shake(duration, magnitude, damping);
             CoroutineRunner.Instance.StartCoroutine(_coroutine);
         }
     }
@@ -40,14 +38,11 @@ public class VectorShaker : ScriptableObject
     // Name :   Shake - Coroutine
     // Desc :   Performs the smoothed shake over time
     // --------------------------------------------------------------------------------------------
-    protected IEnumerator Shake( float duration, float magnitude, float damping )
-    {
-
+    protected IEnumerator Shake(float duration, float magnitude, float damping) {
         float time = 0;
 
         // Loop for duration
-        while (time <= duration)
-        {
+        while (time <= duration) {
             // Generate random offsets in x and y
             float x = Random.Range(-1.0f, 1.0f) * magnitude;
             float y = Random.Range(-1.0f, 1.0f) * magnitude;
@@ -73,5 +68,4 @@ public class VectorShaker : ScriptableObject
         // Coroutine no longer running
         _coroutine = null;
     }
-        
 }

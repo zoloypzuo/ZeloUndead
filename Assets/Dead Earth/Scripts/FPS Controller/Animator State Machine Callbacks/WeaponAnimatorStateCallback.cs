@@ -9,10 +9,10 @@ using UnityEngine;
 [System.Serializable]
 public class MuzzleFlashDescriptor
 {
-    public GameObject   MuzzleFlash = null;
-    public float        LightIntensity = 1.0f;
-    public Color        LightColor = Color.white;
-    public float        Range = 10.0f;
+    public GameObject MuzzleFlash = null;
+    public float LightIntensity = 1.0f;
+    public Color LightColor = Color.white;
+    public float Range = 10.0f;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -23,31 +23,27 @@ public class MuzzleFlashDescriptor
 public class WeaponAnimatorStateCallback : AnimatorStateCallback
 {
     // Inspector Assigned
-    public Light                        MuzzleFlashLight;
-    public List<MuzzleFlashDescriptor>  MuzzleFlashFrames = new List<MuzzleFlashDescriptor>();
-    public float                        MuzzleFlashTime = 0.1f;
-    public int                          MuzzleFlashesPerShot     = 1;
+    public Light MuzzleFlashLight;
+    public List<MuzzleFlashDescriptor> MuzzleFlashFrames = new List<MuzzleFlashDescriptor>();
+    public float MuzzleFlashTime = 0.1f;
+    public int MuzzleFlashesPerShot = 1;
 
     // Private Internals
     protected int _currentMuzzleFlashIndex = 0;
     protected int _lightReferenceCount = 0;
 
-    public  void DoMuzzleFlash()
-    {
+    public void DoMuzzleFlash() {
         if (MuzzleFlashesPerShot < 1) return;
 
         if (MuzzleFlashesPerShot > 1)
             StartCoroutine(EnableMuzzleFlashSequence());
         else
             EnableMuzzleFlash();
-        
     }
 
-    protected void EnableMuzzleFlash()
-    {
+    protected void EnableMuzzleFlash() {
         // Do we have a valid frame to process for the muzzle data
-        if (MuzzleFlashFrames.Count > 0 && MuzzleFlashFrames[_currentMuzzleFlashIndex] != null)
-        {
+        if (MuzzleFlashFrames.Count > 0 && MuzzleFlashFrames[_currentMuzzleFlashIndex] != null) {
             // Get the next muzzle flash object we wish to activate
             MuzzleFlashDescriptor frame = MuzzleFlashFrames[_currentMuzzleFlashIndex];
 
@@ -56,8 +52,7 @@ public class WeaponAnimatorStateCallback : AnimatorStateCallback
                 frame.MuzzleFlash.SetActive(true);
 
             // Now set the light for this frame
-            if (MuzzleFlashLight != null)
-            {
+            if (MuzzleFlashLight != null) {
                 MuzzleFlashLight.color = frame.LightColor;
                 MuzzleFlashLight.intensity = frame.LightIntensity;
                 MuzzleFlashLight.range = frame.Range;
@@ -72,48 +67,40 @@ public class WeaponAnimatorStateCallback : AnimatorStateCallback
             if (_currentMuzzleFlashIndex >= MuzzleFlashFrames.Count)
                 _currentMuzzleFlashIndex = 0;
         }
-
     }
 
-    protected IEnumerator EnableMuzzleFlashSequence()
-    {
+    protected IEnumerator EnableMuzzleFlashSequence() {
         int counter = 0;
         float timer = float.MaxValue;
 
-        while (counter < MuzzleFlashesPerShot)
-        {
+        while (counter < MuzzleFlashesPerShot) {
             timer += Time.deltaTime;
-            if (timer > MuzzleFlashTime)
-            {
+            if (timer > MuzzleFlashTime) {
                 EnableMuzzleFlash();
                 counter++;
                 timer = 0.0f;
             }
+
             yield return null;
         }
     }
 
-    protected IEnumerator DisableMuzzleFlash(int index)
-    {
+    protected IEnumerator DisableMuzzleFlash(int index) {
         yield return new WaitForSeconds(MuzzleFlashTime);
         MuzzleFlashFrames[index].MuzzleFlash.SetActive(false);
         _lightReferenceCount--;
         if (_lightReferenceCount <= 0 && MuzzleFlashLight)
             MuzzleFlashLight.gameObject.SetActive(false);
-
     }
 
-    protected virtual void OnEnable()
-    {
+    protected virtual void OnEnable() {
         _lightReferenceCount = 0;
         _currentMuzzleFlashIndex = 0;
     }
 
-    protected virtual void OnDisable()
-    {
+    protected virtual void OnDisable() {
         if (MuzzleFlashLight) MuzzleFlashLight.gameObject.SetActive(false);
-        for (int i = 0; i < MuzzleFlashFrames.Count; i++)
-        {
+        for (int i = 0; i < MuzzleFlashFrames.Count; i++) {
             if (MuzzleFlashFrames[i].MuzzleFlash)
                 MuzzleFlashFrames[i].MuzzleFlash.SetActive(false);
         }

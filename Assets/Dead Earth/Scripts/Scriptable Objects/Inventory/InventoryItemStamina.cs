@@ -9,21 +9,22 @@ public class InventoryItemStamina : InventoryItem
     [Header("Stamina Properties")]
     [Tooltip("The amount Stamina is boosted on consumption.")]
     [Range(0.0f, 100.0f)]
-    [SerializeField] protected float _boostAmount = 0.0f;
+    [SerializeField]
+    protected float _boostAmount = 0.0f;
 
-    [Header("Shared Variables")]
-    [Tooltip("The SharedFloat that receives the boost.")]
-    [SerializeField] protected SharedFloat _recipient = null;
+    [Header("Shared Variables")] [Tooltip("The SharedFloat that receives the boost.")] [SerializeField]
+    protected SharedFloat _recipient = null;
 
     // Public Properties
-    public float boostAmount { get { return _boostAmount; } }
+    public float boostAmount {
+        get { return _boostAmount; }
+    }
 
     // --------------------------------------------------------------------------------------------
     // Name :   Use
     // Desc :   Called when the item is consumed from the inventory
     // --------------------------------------------------------------------------------------------
-    public override InventoryItem Use(Vector3 position, bool playAudio = true, Inventory inventory = null)
-    {   
+    public override InventoryItem Use(Vector3 position, bool playAudio = true, Inventory inventory = null) {
         // Add health
         if (_recipient)
             _recipient.value = Mathf.Min(_recipient.value + _boostAmount, 100.0f);
