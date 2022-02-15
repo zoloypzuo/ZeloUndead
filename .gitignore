@@ -113,9 +113,49 @@ fabric.properties
 .svn/
 *.exe
 
+# root directory
 Logs/
 Packages/
 ProjectSettings/
+
+# asset directory
+**/_TerrainAutoUpgrade/
+**/Animations/
+**/Animation/
+**/Fonts/
+**/Models/
+**/Prefabs/
+**/Materials/
+**/Scenes/
+**/Animator/
+
+# raw asset
+*.txt
+*.png
+*.jpg
+*.tif
+*.ttf
+*.fbx
+*.tga
+*.obj
+*.ogg
+*.psd
+*.mp3
+
+# unity asset
+*.prefab
+*.mat
+*.mixer
 *.asset
 *.meta
 *.unity
+*.mask
+*.controller
+*.cubemap
+*.raw
+*.physicMaterial
+
+# binary
+*.dll
+*.exr
+*.zip
