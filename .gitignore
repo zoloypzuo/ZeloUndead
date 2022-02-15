@@ -105,7 +105,6 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-
 # @zoloypzuo
 *.pyc
 *.pyo
@@ -116,53 +115,9 @@ fabric.properties
 # root directory
 Logs/
 Packages/
-ProjectSettings/
-
-# asset directory
-**/_TerrainAutoUpgrade/
-**/Animations/
-**/Animation/
-**/Fonts/
-**/Models/
-**/Prefabs/
-**/Materials/
-**/Scenes/
-**/Animator/
-
-# raw asset
-*.txt
-*.png
-*.jpg
-*.tif
-*.ttf
-*.fbx
-*.tga
-*.obj
-*.ogg
-*.psd
-*.mp3
-*.wav
-*.bak
-
-# unity asset
-*.prefab
-*.mat
-*.mixer
-*.asset
-*.meta
-*.unity
-*.mask
-*.controller
-*.cubemap
-*.raw
-*.physicMaterial
 
 # binary
 *.dll
 *.exr
 *.zip
 *.db
-
-# plugin
-**/Standard Assets/
-**/PostProcessing/
