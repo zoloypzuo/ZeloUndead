@@ -38,6 +38,7 @@ $RECYCLE.BIN/
 # ONLY ignore library if using meta files (in EditorSettings.asset)
 Library
 Temp
+Logs
 
 Assembly-CSharp*.csproj
 Assembly-UnityScript*.unityproj
