@@ -105,10 +105,19 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-
 # @zoloypzuo
 *.pyc
 *.pyo
 *.msgpack
 .svn/
 *.exe
+
+# root directory
+Logs/
+Packages/
+
+# binary
+*.dll
+*.exr
+*.zip
+*.db
