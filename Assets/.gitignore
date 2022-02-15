@@ -44,5 +44,6 @@
 *.db
 
 # plugin
-**/Standard Assets/
-**/PostProcessing/
+PostProcessing/
+Standard Assets/
+TextMesh Pro/
