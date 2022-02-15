@@ -141,6 +141,8 @@ ProjectSettings/
 *.ogg
 *.psd
 *.mp3
+*.wav
+*.bak
 
 # unity asset
 *.prefab
@@ -159,3 +161,8 @@ ProjectSettings/
 *.dll
 *.exr
 *.zip
+*.db
+
+# plugin
+**/Standard Assets/
+**/PostProcessing/
