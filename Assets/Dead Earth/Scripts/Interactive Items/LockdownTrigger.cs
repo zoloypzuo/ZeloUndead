@@ -156,7 +156,7 @@ public class LockdownTrigger : MonoBehaviour
 	// -----------------------------------------------------------------------------
 	void OnTriggerExit( Collider other)
 	{
-		if (_downloadComplete) return;
+		
 		if (other.CompareTag("Player") )_inTrigger = false;
 	}
 }

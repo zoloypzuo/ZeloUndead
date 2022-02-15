@@ -128,14 +128,20 @@ public class FPSController : MonoBehaviour
 	[SerializeField] private float 	_gravityMultiplier	= 2.5f;
 	[SerializeField] private float  _runStepLengthen	= 0.75f;
 	[SerializeField] private CurveControlledBob _headBob= new CurveControlledBob();
-	[SerializeField] private GameObject _flashLight 	= null;
-	[SerializeField] private bool _flashlightOnAtStart	= true;
-
+	
 	// Use Standard Assets Mouse Look class for mouse input -> Camera Look Control
 	[SerializeField] private UnityStandardAssets.Characters.FirstPerson.MouseLook _mouseLook = new UnityStandardAssets.Characters.FirstPerson.MouseLook();
 
-	// Private internals
-	private Camera 		_camera							= null;
+    [Header("Shared Variables")]
+    [SerializeField] private SharedFloat    _stamina = null;
+    [SerializeField] private SharedVector3 _cameraShakerOffset = null;
+
+    [Header("Shared Variables - Broadcasters")]
+    [SerializeField] protected SharedVector3 _broadcastPosition = null;
+    [SerializeField] protected SharedVector3 _broadcastDirection = null;
+
+    // Private internals
+    private Camera 		_camera							= null;
 	private bool 		_jumpButtonPressed 				= false;
 	private Vector2 	_inputVector					= Vector2.zero;
 	private Vector3 	_moveDirection 					= Vector3.zero;
@@ -145,8 +151,8 @@ public class FPSController : MonoBehaviour
 	private bool		_isCrouching					= false;
 	private Vector3		_localSpaceCameraPos			= Vector3.zero;
 	private float		_controllerHeight				= 0.0f;
-	private float		_stamina						= 100;
 	private bool		_freezeMovement					= false;
+    private float       _speedOverride                  = 0.0f;
 
 	// Timers
 	private float 		_fallingTimer 					= 0.0f;
@@ -186,12 +192,18 @@ public class FPSController : MonoBehaviour
 		set{ _freezeMovement = value;}
 	}
 
-	public float stamina
-	{
-		get{ return _stamina;}
-	}
+    public float speedOverride
+    {
+        get { return _speedOverride; }
+        set { _speedOverride = value; }
+    }
 
-	protected void Start()
+    public bool isJumping
+    {
+        get { return _isJumping; }
+    }
+
+    protected void Start()
 	{
 		// Cache component references
 		_characterController = GetComponent<CharacterController> ();
@@ -199,23 +211,23 @@ public class FPSController : MonoBehaviour
 
 		// Get the main camera and cache local position within the FPS rig 
 		_camera = Camera.main;
-		_localSpaceCameraPos = _camera.transform.localPosition;
+        if (_camera)
+        {
+            _localSpaceCameraPos = _camera.transform.localPosition;
 
-		// Set initial to not jumping and not moving
-		_movementStatus = PlayerMoveStatus.NotMoving;
+            // Setup Mouse Look Script
+            _mouseLook.Init(transform, _camera.transform);
+        }
+         
+        // Set initial to not jumping and not moving
+        _movementStatus = PlayerMoveStatus.NotMoving;
 
 		// Reset timers
 		_fallingTimer 			= 0.0f;
-
-		// Setup Mouse Look Script
-		_mouseLook.Init(transform , _camera.transform);
-
+        
 		// Initiate Head Bob Object
 		_headBob.Initialize();
-		_headBob.RegisterEventCallback (1.5f, PlayFootStepSound, CurveControlledBobCallbackType.Vertical); 
-
-		if (_flashLight)
-			_flashLight.SetActive (_flashlightOnAtStart);
+		_headBob.RegisterEventCallback (1.5f, PlayFootStepSound, CurveControlledBobCallbackType.Vertical);
 	}
 
 	protected void Update()
@@ -225,14 +237,10 @@ public class FPSController : MonoBehaviour
 		else 								  _fallingTimer+=Time.deltaTime;
 
 		// Allow Mouse Look a chance to process mouse and rotate camera
-		if (Time.timeScale>Mathf.Epsilon)
+		if (Time.timeScale>Mathf.Epsilon && _camera)
 			_mouseLook.LookRotation (transform, _camera.transform);
 
-		if (Input.GetButtonDown ("Flashlight"))
-		{
-			if (_flashLight)
-				_flashLight.SetActive (!_flashLight.activeSelf);
-		}
+		
 
 		// Process the Jump Button
 		// the jump state needs to read here to make sure it is not missed
@@ -276,9 +284,9 @@ public class FPSController : MonoBehaviour
 
 		// Calculate Stamina
 		if (_movementStatus == PlayerMoveStatus.Running)
-			_stamina = Mathf.Max( _stamina - _staminaDepletion * Time.deltaTime, 0.0f );	
+			_stamina.value = Mathf.Max( _stamina.value - _staminaDepletion * Time.deltaTime, 0.0f );	
 		else
-			_stamina = Mathf.Min( _stamina + _staminaRecovery * Time.deltaTime, 100.0f );	
+			_stamina.value = Mathf.Min( _stamina.value + _staminaRecovery * Time.deltaTime, 100.0f );	
 
 
 		_dragMultiplier = Mathf.Min( _dragMultiplier + Time.deltaTime, _dragMultiplierLimit );	
@@ -293,8 +301,11 @@ public class FPSController : MonoBehaviour
 		_isWalking 			= !Input.GetKey(KeyCode.LeftShift);
 
 		// Set the desired speed to be either our walking speed or our running speed
-		float speed = _isCrouching ? _crouchSpeed :_isWalking ? _walkSpeed : Mathf.Lerp(_walkSpeed , _runSpeed, _stamina/100.0f);;
-		_inputVector = new Vector2(horizontal, vertical);
+		float speed = _isCrouching ? _crouchSpeed :_isWalking ? _walkSpeed : Mathf.Lerp(_walkSpeed , _runSpeed, _stamina.value/100.0f);;
+        if (_speedOverride > 0.0f)
+            speed = _speedOverride;
+
+        _inputVector = new Vector2(horizontal, vertical);
 
 		// normalize input if it exceeds 1 in combined length:
 		if (_inputVector.sqrMagnitude > 1)	_inputVector.Normalize();
@@ -337,13 +348,20 @@ public class FPSController : MonoBehaviour
 		// Move the Character Controller
 		_characterController.Move(_moveDirection*Time.fixedDeltaTime);
 
-		// Are we moving
+        // Are we moving
+        Vector3 camShakeOffset = _cameraShakerOffset == null ? Vector3.zero : _cameraShakerOffset.value;
 		Vector3 speedXZ = new Vector3( _characterController.velocity.x, 0.0f, _characterController.velocity.z);
-		if ( speedXZ.magnitude > 0.01f)
-			_camera.transform.localPosition = _localSpaceCameraPos + _headBob.GetVectorOffset (  speedXZ.magnitude * ( _isCrouching||_isWalking?1.0f:_runStepLengthen));
-		else
-			_camera.transform.localPosition = _localSpaceCameraPos;
-	}
+        if (_camera)
+        {
+            if (speedXZ.magnitude > 0.01f)
+                _camera.transform.localPosition = _localSpaceCameraPos + _headBob.GetVectorOffset(speedXZ.magnitude * (_isCrouching || _isWalking ? 1.0f : _runStepLengthen)) + camShakeOffset;
+            else
+                _camera.transform.localPosition = _localSpaceCameraPos + camShakeOffset;
+        }
+        // Update broadcasters
+        _broadcastPosition.value  = transform.position;
+        _broadcastDirection.value = transform.forward;
+    }
 
 	void PlayFootStepSound()
 	{

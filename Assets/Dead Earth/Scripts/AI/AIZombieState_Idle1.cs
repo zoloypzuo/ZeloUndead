@@ -31,10 +31,12 @@ public class AIZombieState_Idle1 : AIZombieState
 	// ------------------------------------------------------------------
 	public override void		OnEnterState()			
 	{
+        // Debug.Log("Entering Idle");
 		base.OnEnterState ();
 		if (_zombieStateMachine == null)
 			return;
 
+      
 		// Set Idle Time
 		_idleTime = Random.Range (_idleTimeRange.x, _idleTimeRange.y);
 		_timer 	  = 0.0f;
@@ -100,4 +102,6 @@ public class AIZombieState_Idle1 : AIZombieState
 		// No state change required
 		return AIStateType.Idle;
 	}
+
+   
 }
