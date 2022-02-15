@@ -39,9 +39,12 @@ $RECYCLE.BIN/
 Library
 Temp
 Logs
+obj
 
 Assembly-CSharp*.csproj
 Assembly-UnityScript*.unityproj
 Unity3D*.sln
 
 .git
+.idea
+.vscode
